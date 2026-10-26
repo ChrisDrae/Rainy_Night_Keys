@@ -1,0 +1,1148 @@
+<title>Keys Nocturne</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=DM+Mono:wght@400&display=swap">
+<style>
+/* Nocturne: the Keys window in a dark, cinematic register. A grainy field of smeared light on deep
+   navy fills the window, controls sit on soft dark tiles, and one signal red marks pointers and caps.
+   Single dark look on purpose. */
+:root {
+  color-scheme: dark;
+  --night: #06090f;              /* page */
+  --deck: #070b12;               /* window base */
+  --tile: rgba(3, 6, 11, .34);   /* soft dark tiles */
+  --pop: rgba(6, 9, 14, .97);
+  --fg: #ebe7e1;                 /* labels, rings */
+  --fg-dim: #8e96a1;
+  --rule: rgba(235, 231, 225, .55);
+  --line: rgba(235, 231, 225, .16);
+  --red: #ec3a40;                /* pointers, caps, title */
+  --f-wide: "Archivo", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --f-mono: "DM Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+html, body { background: var(--night); }
+[hidden] { display: none !important; }
+body { color: var(--fg); font-family: var(--f-wide); font-size: 15px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+
+.page {
+  max-width: 1064px; margin: 0 auto;
+  padding-block: clamp(20px, 4vw, 44px) 72px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: clamp(20px, 3vw, 32px);
+}
+.intro { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px 32px; }
+.intro > div { min-width: 0; }
+.eyebrow { margin: 0 0 8px; font-size: 11px; font-weight: 600; font-stretch: 118%; letter-spacing: .2em; text-transform: uppercase; color: var(--fg-dim); }
+.intro h1 { margin: 0; font-weight: 800; font-stretch: 118%; text-transform: uppercase; letter-spacing: .32em; font-size: clamp(28px, 4.4vw, 44px); line-height: 1.05; color: var(--red); text-wrap: balance; }
+.intro p.lede { margin: .7em 0 0; color: #c9c5bf; max-width: 62ch; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.btn { font: 700 12px/1 var(--f-wide); font-stretch: 115%; letter-spacing: .12em; text-transform: uppercase; color: var(--night); background: var(--fg); border: 0; border-radius: 10px; padding: 13px 18px; cursor: pointer; }
+.btn:disabled { opacity: .5; cursor: default; }
+.btn.ghost { background: transparent; color: var(--fg); box-shadow: inset 0 0 0 1.5px var(--rule); }
+button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+
+/* ---------- plugin window ---------- */
+.plugin { container-type: inline-size; }
+.win { position: relative; isolation: isolate; display: flex; flex-direction: column; border-radius: 12px; overflow: hidden; background: var(--deck); box-shadow: 0 0 0 1px var(--line), 0 40px 90px -40px rgba(0, 0, 0, .95); }
+.field, .specks, .grain, .vignette { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+.field { display: block; transform: scale(1.1); }
+.specks { display: block; }
+.grain { mix-blend-mode: overlay; background-size: 180px 180px; opacity: .18; }
+.vignette { background: radial-gradient(115% 90% at 50% 42%, transparent 38%, rgba(2, 4, 8, .92) 100%); }
+
+.hdr { position: relative; display: flex; align-items: center; gap: 10px; padding: 14px 16px 0; }
+.sq { appearance: none; width: 36px; height: 36px; border-radius: 9px; border: 0; background: var(--tile); box-shadow: inset 0 0 0 1.5px var(--rule); color: var(--fg); cursor: pointer; font-size: 15px; display: grid; place-items: center; }
+.chip { font-size: 9.5px; font-weight: 700; font-stretch: 120%; letter-spacing: .18em; text-transform: uppercase; padding: 8px 11px; border-radius: 999px; box-shadow: inset 0 0 0 1.5px var(--line); color: var(--fg-dim); white-space: nowrap; }
+.spacer { flex: 1; }
+.presetbox { display: flex; align-items: center; border-radius: 10px; background: var(--tile); box-shadow: inset 0 0 0 1.5px var(--rule); min-width: 0; }
+.presetbox button { appearance: none; border: 0; background: none; color: var(--fg); width: 32px; height: 36px; cursor: pointer; font-size: 11px; }
+.presetbox select { appearance: none; -webkit-appearance: none; border: 0; background: transparent; color: var(--fg); font: 600 14px/1 var(--f-wide); font-stretch: 108%; letter-spacing: .02em; padding: 0 6px; min-width: 9.5em; text-align: center; text-align-last: center; cursor: pointer; }
+select option { background: #0b1018; color: var(--fg); }
+
+.pop { position: absolute; z-index: 8; padding: 14px; border-radius: 14px; background: var(--pop); box-shadow: 0 0 0 1px var(--line), 0 24px 48px rgba(0, 0, 0, .7); display: grid; gap: 12px; font-size: 13px; }
+.pop h3 { margin: 0; font-size: 9.5px; font-weight: 700; font-stretch: 120%; letter-spacing: .2em; text-transform: uppercase; color: var(--fg-dim); }
+.pop p { margin: 0; color: #c9c5bf; }
+.pop .muted { color: var(--fg-dim); font-size: 12px; }
+.pop .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.menu { left: 16px; top: 58px; width: min(310px, calc(100% - 32px)); }
+
+.title { margin: 8px 0 14px; text-align: center; font-weight: 800; font-stretch: 112%; text-transform: uppercase; letter-spacing: .62em; padding-left: .62em; color: var(--red); font-size: clamp(22px, 3.4cqw, 34px); line-height: 1; text-shadow: 0 0 24px rgba(236, 58, 64, .35); }
+
+.rows { display: grid; gap: 14px; padding: 0 22px 4px; }
+.row { display: grid; gap: 14px; }
+.r1 { grid-template-columns: minmax(0, .8fr) repeat(3, minmax(0, 2fr)) minmax(0, .8fr); }
+.r2 { grid-template-columns: minmax(0, 1.5fr) minmax(0, 4.3fr) minmax(0, 1.5fr); }
+.r3 { grid-template-columns: minmax(0, 1.9fr) minmax(0, 2fr) minmax(0, 1.9fr) minmax(0, 1.6fr); }
+.tile { position: relative; background: var(--tile); border-radius: 18px; padding: 14px 12px 12px; display: grid; justify-items: center; align-content: center; gap: 8px; min-width: 0; transition: box-shadow .25s; }
+.tile.live { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--hue) 60%, transparent), 0 0 34px -10px color-mix(in srgb, var(--hue) 70%, transparent); }
+.tile.split { display: flex; align-items: center; justify-content: center; gap: 12px 14px; flex-wrap: wrap; }
+.kcol { display: grid; justify-items: center; gap: 8px; }
+
+.lab { appearance: none; border: 0; background: none; color: var(--fg); padding: 2px 4px; font: 700 12.5px/1 var(--f-wide); font-stretch: 125%; letter-spacing: .1em; text-transform: uppercase; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+button.lab { cursor: pointer; border-radius: 6px; }
+.lab .tri { font-size: 9px; color: var(--fg-dim); }
+button.lab[aria-expanded="true"] .tri { color: var(--red); }
+.hue { width: 5px; height: 5px; border-radius: 50%; background: var(--hue); box-shadow: 0 0 8px var(--hue); flex: none; }
+.val { font: 400 10.5px/1 var(--f-mono); color: var(--fg-dim); min-height: 11px; font-variant-numeric: tabular-nums; opacity: 0; transition: opacity .2s; }
+.tile:hover .val, .tile:focus-within .val, .tile.live .val { opacity: 1; }
+.cap { font-size: 8.5px; font-weight: 600; font-stretch: 120%; letter-spacing: .2em; text-transform: uppercase; color: var(--fg-dim); }
+
+.knob { touch-action: none; cursor: ns-resize; border-radius: 50%; outline: none; }
+.knob.outline { width: var(--kb, 108px); height: var(--kb, 108px); }
+.knob.ring { width: var(--ks, 58px); height: var(--ks, 58px); }
+.knob svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.knob:focus-visible { box-shadow: 0 0 0 2px var(--fg); }
+.knob .tk { stroke: var(--fg); stroke-width: 2.2; opacity: .3; }
+.knob .tk.on { opacity: .95; }
+.knob.outline .ring { fill: rgba(0, 0, 0, .16); stroke: rgba(235, 231, 225, .8); stroke-width: 1.6; }
+.knob.outline .ptr { stroke: var(--red); stroke-width: 3.2; stroke-linecap: round; }
+.knob.ring .tk { stroke-width: 1.6; }
+.knob.ring .ring { fill: rgba(0, 0, 0, .24); stroke: var(--red); stroke-width: 2.8; }
+.knob.ring .ptr { stroke: var(--red); stroke-width: 2.8; stroke-linecap: round; }
+.r1 { --kb: clamp(80px, 11.5cqw, 116px); }
+
+.vs { position: relative; width: 44px; height: var(--vh, 116px); touch-action: none; cursor: ns-resize; outline: none; border-radius: 6px; }
+.vs:focus-visible { box-shadow: 0 0 0 2px var(--fg); }
+.vs .rail { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--rule); }
+.vs .det { position: absolute; left: 50%; top: 50%; width: 16px; height: 1.5px; margin-left: -8px; background: var(--rule); }
+.vs .capbar { position: absolute; left: 50%; width: 32px; height: 6px; margin-left: -16px; margin-bottom: -3px; background: var(--red); border-radius: 1px; box-shadow: 0 0 14px rgba(236, 58, 64, .45); }
+.vstack { display: grid; justify-items: center; gap: 6px; }
+.sig { display: flex; gap: 6px; justify-content: center; }
+.sig .vs { --vh: 82px; }
+
+.dd { position: relative; display: grid; justify-items: center; gap: 6px; }
+.dd select { appearance: none; -webkit-appearance: none; background: rgba(0, 0, 0, .18); color: var(--fg); border: 1.5px solid var(--rule); border-radius: 10px; padding: 8px 28px 8px 14px; font: 600 12.5px/1.1 var(--f-wide); font-stretch: 110%; letter-spacing: .03em; min-width: 96px; text-align: center; text-align-last: center; cursor: pointer; }
+.dd::after { content: "▾"; position: absolute; right: 11px; top: 8px; font-size: 11px; color: var(--fg); pointer-events: none; }
+.bellpanel { display: grid; gap: 12px; justify-items: center; }
+.bellpanel .opts { display: flex; flex-wrap: wrap; gap: 12px 18px; justify-content: center; }
+
+.dots { display: grid; gap: 10px; }
+.dot { appearance: none; border: 0; background: none; color: var(--fg); font: 700 11px/1 var(--f-wide); font-stretch: 120%; letter-spacing: .12em; text-transform: uppercase; display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 2px; border-radius: 4px; }
+.dot::before { content: ""; width: 13px; height: 13px; border-radius: 50%; box-shadow: inset 0 0 0 1.6px var(--fg); flex: none; }
+.dot[aria-pressed="true"]::before { background: var(--fg); }
+
+.chk { appearance: none; border: 0; background: none; color: var(--fg); font: 700 10.5px/1 var(--f-wide); font-stretch: 120%; letter-spacing: .14em; text-transform: uppercase; display: inline-flex; align-items: center; gap: 10px; cursor: pointer; padding: 2px; border-radius: 4px; }
+.chk::before { content: ""; width: 16px; height: 16px; border-radius: 3px; box-shadow: inset 0 0 0 1.6px var(--rule); flex: none; }
+.chk[aria-pressed="true"]::before { background: var(--red); box-shadow: 0 0 12px rgba(236, 58, 64, .5); }
+
+.fine { width: 250px; }
+.fine .head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.fine .head b { font-weight: 800; font-stretch: 122%; letter-spacing: .12em; text-transform: uppercase; font-size: 12px; }
+.fine .x { appearance: none; border: 0; background: none; color: var(--fg-dim); cursor: pointer; font-size: 13px; width: 26px; height: 26px; border-radius: 6px; }
+.ctl { display: grid; gap: 4px; }
+.ctl label { display: flex; justify-content: space-between; gap: 10px; font-size: 9.5px; font-weight: 700; font-stretch: 120%; letter-spacing: .18em; text-transform: uppercase; color: var(--fg-dim); }
+.ctl output { font: 400 10.5px/1 var(--f-mono); letter-spacing: 0; color: var(--fg); text-transform: none; }
+.pop input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 22px; background: transparent; margin: 0; }
+.pop input[type="range"]::-webkit-slider-runnable-track { height: 2px; background: var(--rule); }
+.pop input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 6px; height: 18px; margin-top: -8px; background: var(--red); border-radius: 1px; }
+.pop input[type="range"]::-moz-range-track { height: 2px; background: var(--rule); }
+.pop input[type="range"]::-moz-range-thumb { width: 6px; height: 18px; background: var(--red); border: 0; border-radius: 1px; }
+.pop .dd select { min-width: 0; width: 100%; }
+
+.foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 24px 14px; }
+.foot .mid { font-size: 10px; font-weight: 700; font-stretch: 125%; letter-spacing: .32em; text-transform: uppercase; color: var(--fg-dim); text-align: center; }
+
+.keys { padding: 0 22px 16px; background: rgba(4, 6, 10, .94); }
+.kb-meta { display: flex; justify-content: space-between; gap: 8px 14px; flex-wrap: wrap; padding: 9px 0 7px; font-size: 9.5px; font-weight: 600; font-stretch: 118%; letter-spacing: .16em; text-transform: uppercase; color: var(--fg-dim); }
+.kb-scroll { overflow-x: auto; scrollbar-width: thin; }
+.kb { position: relative; display: flex; height: 64px; min-width: 720px; user-select: none; -webkit-user-select: none; touch-action: pan-x; }
+.wk { flex: 1; position: relative; box-sizing: border-box; border-right: 1px solid rgba(4, 6, 10, .8); background: linear-gradient(#d3d9de, #a9b2ba); border-radius: 0 0 3px 3px; cursor: pointer; }
+.wk.pc { box-shadow: inset 0 2px 0 rgba(236, 58, 64, .8); }
+.wk.on { background: linear-gradient(#f6cfd0, #e2686d); }
+.wk.c::after { content: attr(data-label); position: absolute; bottom: 4px; left: 0; right: 0; text-align: center; font: 400 8.5px/1 var(--f-mono); color: #56606a; }
+.bk { position: absolute; top: 0; height: 60%; z-index: 1; background: linear-gradient(#1a1f26, #07090c); border-radius: 0 0 2px 2px; box-shadow: 0 2px 3px rgba(0, 0, 0, .6); cursor: pointer; }
+.bk.on { background: linear-gradient(#8a2329, #4a0f13); }
+
+@container (max-width: 760px) {
+  .r1, .r2, .r3 { display: flex; flex-wrap: wrap; }
+  .r1 > .tile, .r2 > .tile, .r3 > .tile { flex: 1 1 140px; }
+  .r1 > .big { flex-basis: 28%; }
+  .r2 > .bellpanel { order: -1; flex-basis: 100%; }
+  .rows { padding-left: 14px; padding-right: 14px; }
+  .title { letter-spacing: .45em; padding-left: .45em; }
+}
+@container (max-width: 480px) {
+  .chip, .foot .mid { display: none; }
+  .presetbox select { min-width: 0; font-size: 13px; }
+  .r1 { --kb: 76px; }
+  .keys, .foot { padding-left: 14px; padding-right: 14px; }
+}
+
+/* ---------- notes ---------- */
+.notes { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr); gap: 32px 48px; padding-top: 8px; }
+@media (max-width: 840px) { .notes { grid-template-columns: minmax(0, 1fr); } }
+.notes h2 { margin: 0 0 12px; font-size: 15px; font-weight: 800; font-stretch: 122%; letter-spacing: .16em; text-transform: uppercase; text-wrap: balance; }
+.notes p, .notes li { color: #c9c5bf; max-width: 62ch; }
+.notes p { margin: 0 0 12px; }
+.notes ul { margin: 0 0 24px; padding-left: 18px; display: grid; gap: 8px; }
+.legend-wrap { overflow-x: auto; margin-bottom: 8px; }
+table.legend { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14px; }
+.legend th { font-size: 9.5px; font-weight: 700; font-stretch: 120%; letter-spacing: .2em; text-transform: uppercase; color: var(--fg-dim); text-align: left; padding: 0 14px 10px 0; border-bottom: 1px solid var(--line); }
+.legend td { padding: 11px 14px 11px 0; border-bottom: 1px solid var(--line); vertical-align: top; color: #c9c5bf; }
+.legend td:first-child { white-space: nowrap; color: var(--fg); font-weight: 700; font-stretch: 115%; letter-spacing: .06em; text-transform: uppercase; font-size: 12.5px; }
+.sw { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--c); box-shadow: 0 0 12px var(--c); margin-right: 10px; }
+kbd { font: 400 12px/1.4 var(--f-mono); padding: 0 6px; border-radius: 4px; box-shadow: inset 0 0 0 1px rgba(235, 231, 225, .25); color: var(--fg); white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) { .val, .tile { transition: none; } }
+</style>
+
+<main class="page">
+  <header class="intro">
+    <div>
+      <p class="eyebrow">Keys · UI draft, second direction</p>
+      <h1>Nocturne</h1>
+      <p class="lede">A darker, cinematic take on the same instrument, closer to Teletone's Anamorph: smeared light on deep blue, film grain, soft tiles and one signal red. The knobs still tint the light. Sound starts on your first click.</p>
+    </div>
+    <div class="actions">
+      <button class="btn" id="playPhrase" type="button">▶ Play a phrase</button>
+      <button class="btn ghost" id="nextPresetTop" type="button">Next preset</button>
+    </div>
+  </header>
+
+  <section class="plugin" aria-label="Keys plugin window mockup, Nocturne direction">
+    <div class="win" id="win">
+      <canvas class="field" id="field" width="384" height="300"></canvas>
+      <canvas class="specks" id="specks"></canvas>
+      <div class="grain" id="grain"></div>
+      <div class="vignette" id="vignette"></div>
+
+      <div class="hdr">
+        <button class="sq" id="menuBtn" type="button" aria-label="Menu" aria-haspopup="dialog" aria-expanded="false">☰</button>
+        <span class="chip" title="Modeled tines. Load your own Mk II library from the menu in the plugin.">Demo tines</span>
+        <span class="spacer"></span>
+        <div class="presetbox">
+          <button type="button" id="prevPreset" aria-label="Previous preset">◀</button>
+          <select id="preset" aria-label="Preset"></select>
+          <button type="button" id="nextPreset" aria-label="Next preset">▶</button>
+        </div>
+        <div class="pop menu" id="menu" role="dialog" aria-label="Menu" hidden>
+          <div>
+            <h3>Library</h3>
+            <div class="row"><p>Demo tines (modeled)</p><span class="muted">active</span></div>
+            <div class="row"><p class="muted">Load sample library…</p><span class="muted">in the plugin</span></div>
+          </div>
+          <div class="ctl" id="menuTune"></div>
+          <div class="ctl" id="menuTouch"></div>
+          <div><button class="chk" id="stillToggle" type="button" aria-pressed="false">Still background</button></div>
+          <div>
+            <h3>Credits</h3>
+            <p class="muted">Celeste samples by stamperadam on freesound.org, as packaged in Sonatina Symphonic Orchestra (CC0). Vibraphone from the Versilian Community Sample Library (CC0).</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="title" role="heading" aria-level="2">Keys</div>
+
+      <div class="rows">
+        <div class="row r1">
+          <div class="tile vt" id="tBlend" style="--hue:#f4e3c3"></div>
+          <div class="tile big" data-k="warmth"></div>
+          <div class="tile big" data-k="bark"></div>
+          <div class="tile big" data-k="body"></div>
+          <div class="tile vt" id="tLevel" style="--hue:#ebe7e1"></div>
+        </div>
+        <div class="row r2">
+          <div class="tile sm" data-k="dust"></div>
+          <div class="tile bellpanel" id="tBell" style="--hue:#f4e3c3"></div>
+          <div class="tile sm" data-k="mech"></div>
+        </div>
+        <div class="row r3">
+          <div class="tile split" data-k="patina"></div>
+          <div class="tile split" data-k="motion"></div>
+          <div class="tile split" data-k="space"></div>
+          <div class="tile" id="tSignal" style="--hue:#ebe7e1"></div>
+        </div>
+      </div>
+
+      <div class="foot">
+        <button class="chk" id="keysToggle" type="button" aria-pressed="true" aria-controls="keys">Keys</button>
+        <span class="mid">Tine &amp; Bell</span>
+        <button class="chk" id="pedal" type="button" aria-pressed="false">Pedal</button>
+      </div>
+
+      <div class="keys" id="keys">
+        <div class="kb-meta">
+          <span id="pcRange">Computer keys C3 – F4 · Z / X octave</span>
+          <span>Hold space for the pedal</span>
+        </div>
+        <div class="kb-scroll"><div class="kb" id="kb" aria-label="On-screen keyboard"></div></div>
+      </div>
+
+      <div class="pop fine" id="fine" role="dialog" hidden></div>
+    </div>
+  </section>
+
+  <section class="notes">
+    <div>
+      <h2>How the color works</h2>
+      <p>Each knob still owns a color in the light behind the controls. The hues moved toward night: warm reds, magenta, violet and deep blue on navy, with grain over everything.</p>
+      <div class="legend-wrap">
+        <table class="legend">
+          <thead><tr><th>Control</th><th>Sound, 0 to 100</th><th>Picture</th></tr></thead>
+          <tbody id="legendBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div>
+      <h2>What changed from Lightbox</h2>
+      <ul>
+        <li>Everything is on one screen, in soft dark tiles. There are no drawers. Only Warmth, Bark, Body and Space have a ▾ for fine controls.</li>
+        <li>The big three use thin outline knobs with a red pointer. The others are red ring knobs. Lit tick marks show the value.</li>
+        <li>Tine and Bell is a vertical Blend slider, and the bell's options have their own panel. Level is the slider on the right.</li>
+        <li>Patina gets three toggles. Motion and Space get dropdowns. Tune and Touch moved into ☰.</li>
+      </ul>
+      <h2>Try it</h2>
+      <ul>
+        <li>Drag knobs and sliders up or down. Hold <kbd>Shift</kbd> for fine steps, double-click to reset.</li>
+        <li>Play with the mouse (lower on a key is louder) or <kbd>A</kbd> to <kbd>'</kbd> on your keyboard. <kbd>Z</kbd> and <kbd>X</kbd> shift the octave, and holding <kbd>Space</kbd> is the pedal.</li>
+        <li>The sound is a small browser synth standing in for the real engine.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+'use strict';
+const $ = (s, r = document) => r.querySelector(s);
+const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const mtof = n => 440 * Math.pow(2, (n - 69) / 12);
+const NOTE = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
+const noteName = n => NOTE[((n % 12) + 12) % 12] + (Math.floor(n / 12) - 1);
+const rgbOf = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+const mix3 = (a, b, t) => [lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)];
+
+// ============================================================ model
+const HUES = { warmth: '#d64a3a', bark: '#e8263f', body: '#b02a84', patina: '#93708a', motion: '#6a46dc', space: '#2856b0', bell: '#f4e3c3', vibes: '#bfe3ff' };
+const INFO = {
+  warmth: { name: 'Warmth', sound: 'Clean to warm preamp: low-mid lift, a softer top, gentle tube saturation.', picture: 'Coral-red light and a warmer wash.' },
+  bark: { name: 'Bark', sound: 'Round and bell-like to growling. Pickup asymmetry adds harmonics, more when you play harder.', picture: 'Crimson cores that flicker.' },
+  body: { name: 'Body', sound: 'Thin to full: low-mid resonance, a doubled voice, a wider spread across the keys.', picture: 'Bigger, denser magenta forms.' },
+  patina: { name: 'Patina', sound: 'Fresh to worn tape. Toggles pick wow, flutter and a narrower band.', picture: 'Faded blacks, heavier grain, a deeper vignette.' },
+  motion: { name: 'Motion', sound: 'Still to moving: suitcase-style stereo vibrato, chorus, or both.', picture: 'Violet light smears and drifts faster.' },
+  space: { name: 'Space', sound: 'Dry to spacious: spring, plate or room.', picture: 'Deep blue haze and softer edges.' },
+  blend: { name: 'Blend', sound: 'Tines at the bottom, bell at the top, both at full in the middle.', picture: 'Pale gold or ice-blue specks on every note.' },
+  dust: { name: 'Dust', sound: 'Tape hiss and vinyl crackle under the notes.', picture: 'More specks and the odd scratch.' },
+};
+const DEFAULTS = { blend: .38, warmth: .62, bark: .3, body: .58, patina: .35, motion: .32, space: .42,
+  dust: .18, mech: .35, touch: .5, tune: .5, volume: .8, di: .85, amp: .35, room: .25 };
+const FINE_DEFAULTS = { warmthDrive: .5, warmthTilt: .5, warmthChar: 'Tube', barkVel: .5, barkDing: .5,
+  bodyRes: .5, bodyDouble: .35, bodyWidth: .5, motionMode: 'Vibrato', motionHz: '1.6',
+  spaceType: 'Plate', spacePre: .2, spaceDecay: .45, spaceTone: .55,
+  bellVoice: 'Celeste', bellOctave: '0', bellRange: '41', bellDecay: .5,
+  wow: true, flutter: true, narrow: true };
+const S = { ...DEFAULTS };
+const F = { ...FINE_DEFAULTS };
+
+const PRESETS = [
+  { name: 'Dusk Ballad', v: { ...DEFAULTS }, f: {} },
+  { name: 'Sunday Tape', v: { blend: .22, warmth: .58, bark: .28, body: .52, patina: .8, motion: .18, space: .3, dust: .48, mech: .42, di: .8, amp: .3, room: .35 }, f: { spaceType: 'Room' } },
+  { name: 'Glass Lullaby', v: { blend: .74, warmth: .3, bark: .08, body: .42, patina: .18, motion: .26, space: .66, dust: .08, mech: .25, di: .9, amp: .1, room: .3 }, f: { bellOctave: '+1', flutter: false } },
+  { name: 'Basement Soul', v: { blend: .1, warmth: .72, bark: .78, body: .72, patina: .24, motion: .58, space: .2, dust: .14, mech: .45, di: .6, amp: .75, room: .3 }, f: { spaceType: 'Spring', motionHz: '4' } },
+  { name: 'Snowglobe', v: { blend: .86, warmth: .22, bark: .04, body: .36, patina: .3, motion: .5, space: .82, dust: .22, mech: .2, di: .9, amp: .05, room: .4 }, f: { bellVoice: 'Both', motionMode: 'Chorus', motionHz: '1' } },
+  { name: 'Late Bus', v: { blend: .46, warmth: .5, bark: .36, body: .6, patina: .56, motion: .62, space: .55, dust: .3, mech: .35, di: .75, amp: .4, room: .3 }, f: { bellVoice: 'Vibes', motionMode: 'Both', spaceType: 'Spring' } },
+  { name: 'Bare DI', v: { blend: 0, warmth: 0, bark: 0, body: 0, patina: 0, motion: 0, space: 0, dust: 0, mech: .3, di: 1, amp: 0, room: 0 }, f: {} },
+];
+
+const FINE = {
+  warmth: [{ id: 'warmthDrive', label: 'Drive' }, { id: 'warmthTilt', label: 'Tilt' }, { id: 'warmthChar', label: 'Character', options: ['Tube', 'Transistor'] }],
+  bark: [{ id: 'barkVel', label: 'Velocity to bark' }, { id: 'barkDing', label: 'Tine ding' }],
+  body: [{ id: 'bodyRes', label: 'Resonance' }, { id: 'bodyDouble', label: 'Double' }, { id: 'bodyWidth', label: 'Width' }],
+  space: [{ id: 'spacePre', label: 'Pre-delay', fmt: v => Math.round(v * 120) + ' ms' }, { id: 'spaceDecay', label: 'Decay', fmt: v => (0.5 + v * 3.5).toFixed(1) + ' s' }, { id: 'spaceTone', label: 'Tone' }],
+};
+
+const fmtFor = id => {
+  if (id === 'tune') return v => { const c = Math.round((v - .5) * 100); return (c > 0 ? '+' : c < 0 ? '−' : '') + Math.abs(c) + ' ct'; };
+  if (id === 'volume') return v => { if (v < .005) return '−∞ dB'; const db = 40 * Math.log10(v / .8); return (db >= 0 ? '+' : '−') + Math.abs(db).toFixed(1) + ' dB'; };
+  if (id === 'blend') return v => v < .49 ? `tine · bell ${Math.round(v * 200)}%` : v > .51 ? `bell · tine ${Math.round((1 - v) * 200)}%` : 'both at full';
+  return v => String(Math.round(v * 100));
+};
+
+// ============================================================ parameter plumbing
+const views = {};
+const onView = (id, fn) => { (views[id] = views[id] || []).push(fn); fn(S[id]); };
+function setP(id, v) { S[id] = clamp(v, 0, 1); (views[id] || []).forEach(fn => fn(S[id])); applyAudio(id); }
+let tweenId = 0;
+function tweenTo(target, ms = 520) {
+  const from = {}; for (const k in target) from[k] = S[k];
+  const t0 = performance.now(), my = ++tweenId;
+  const step = now => {
+    if (my !== tweenId) return;
+    const u = clamp((now - t0) / ms, 0, 1), e = u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+    for (const k in target) setP(k, lerp(from[k], target[k], e));
+    if (u < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+function keyStep(e, id) {
+  const step = e.shiftKey ? .1 : .01; let v = S[id];
+  switch (e.key) {
+    case 'ArrowUp': case 'ArrowRight': v += step; break;
+    case 'ArrowDown': case 'ArrowLeft': v -= step; break;
+    case 'PageUp': v += .1; break; case 'PageDown': v -= .1; break;
+    case 'Home': v = 0; break; case 'End': v = 1; break;
+    default: return;
+  }
+  e.preventDefault(); e.stopPropagation(); setP(id, v);
+}
+
+// ============================================================ controls
+function knobSVG(style) {
+  let s = '';
+  if (style === 'outline') {
+    for (let i = 0; i < 11; i++) { const a = -135 + 27 * i; s += `<line class="tk" data-a="${a}" x1="60" y1="11" x2="60" y2="4" transform="rotate(${a} 60 60)"/>`; }
+    return `<svg viewBox="0 0 120 120" aria-hidden="true">${s}<circle class="ring" cx="60" cy="60" r="39"/><line class="ptr" x1="60" y1="56" x2="60" y2="24"/></svg>`;
+  }
+  for (let i = 0; i < 21; i++) { const a = -135 + 13.5 * i; s += `<line class="tk" data-a="${a}" x1="40" y1="9" x2="40" y2="4" transform="rotate(${a} 40 40)"/>`; }
+  return `<svg viewBox="0 0 80 80" aria-hidden="true">${s}<circle class="ring" cx="40" cy="40" r="23"/><line class="ptr" x1="40" y1="40" x2="40" y2="20"/></svg>`;
+}
+function makeKnob(id, label, style, tile) {
+  const el = document.createElement('div');
+  el.className = 'knob ' + style; el.tabIndex = 0;
+  el.setAttribute('role', 'slider'); el.setAttribute('aria-label', label);
+  el.setAttribute('aria-valuemin', '0'); el.setAttribute('aria-valuemax', '100');
+  el.innerHTML = knobSVG(style);
+  const ptr = el.querySelector('.ptr'), ticks = [...el.querySelectorAll('.tk')].map(t => [t, +t.dataset.a]);
+  const c = style === 'outline' ? 60 : 40, fmt = fmtFor(id);
+  onView(id, v => {
+    const a = -135 + 270 * v;
+    ptr.setAttribute('transform', `rotate(${a.toFixed(2)} ${c} ${c})`);
+    for (const [t, ta] of ticks) t.classList.toggle('on', ta <= a + .5);
+    el.setAttribute('aria-valuenow', String(Math.round(v * 100)));
+    el.setAttribute('aria-valuetext', fmt(v));
+  });
+  let drag = null;
+  el.addEventListener('pointerdown', e => {
+    if (e.button !== 0) return;
+    e.preventDefault(); el.setPointerCapture(e.pointerId); el.focus({ preventScroll: true });
+    drag = { y: e.clientY }; tile && tile.classList.add('live');
+  });
+  el.addEventListener('pointermove', e => {
+    if (!drag) return;
+    const dy = drag.y - e.clientY; drag.y = e.clientY;
+    setP(id, S[id] + dy * (e.shiftKey ? .0012 : .005));
+  });
+  const end = () => { if (drag) { drag = null; tile && tile.classList.remove('live'); } };
+  el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
+  el.addEventListener('dblclick', () => tweenTo({ [id]: DEFAULTS[id] }, 260));
+  el.addEventListener('wheel', e => { e.preventDefault(); setP(id, S[id] + (e.deltaY < 0 ? 1 : -1) * (e.shiftKey ? .005 : .02)); }, { passive: false });
+  el.addEventListener('keydown', e => keyStep(e, id));
+  return el;
+}
+function makeVS(id, label, detent, tile) {
+  const el = document.createElement('div');
+  el.className = 'vs'; el.tabIndex = 0;
+  el.setAttribute('role', 'slider'); el.setAttribute('aria-label', label); el.setAttribute('aria-orientation', 'vertical');
+  el.setAttribute('aria-valuemin', '0'); el.setAttribute('aria-valuemax', '100');
+  el.innerHTML = '<div class="rail"></div>' + (detent ? '<div class="det"></div>' : '') + '<div class="capbar"></div>';
+  const cap = el.querySelector('.capbar'), fmt = fmtFor(id);
+  onView(id, v => { cap.style.bottom = (v * 100) + '%'; el.setAttribute('aria-valuenow', String(Math.round(v * 100))); el.setAttribute('aria-valuetext', fmt(v)); });
+  const fromY = e => { const r = el.getBoundingClientRect(); let v = clamp(1 - (e.clientY - r.top) / r.height, 0, 1); if (detent && Math.abs(v - .5) < .025) v = .5; return v; };
+  let down = false;
+  el.addEventListener('pointerdown', e => { if (e.button !== 0) return; e.preventDefault(); down = true; el.setPointerCapture(e.pointerId); el.focus({ preventScroll: true }); tile && tile.classList.add('live'); setP(id, fromY(e)); });
+  el.addEventListener('pointermove', e => { if (down) setP(id, fromY(e)); });
+  const end = () => { down = false; tile && tile.classList.remove('live'); };
+  el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
+  el.addEventListener('dblclick', () => tweenTo({ [id]: DEFAULTS[id] }, 260));
+  el.addEventListener('keydown', e => keyStep(e, id));
+  return el;
+}
+const ddViews = {};
+function makeDD(id, caption, options) {
+  const wrap = document.createElement('div'); wrap.className = 'dd';
+  const sel = document.createElement('select'); sel.id = 'dd-' + id; sel.setAttribute('aria-label', caption);
+  for (const o of options) { const op = document.createElement('option'); op.value = o.value ?? o; op.textContent = o.label ?? o; sel.append(op); }
+  sel.value = F[id];
+  sel.addEventListener('change', () => { F[id] = sel.value; applyAudio(id); });
+  ddViews[id] = () => { sel.value = F[id]; };
+  const cap = document.createElement('span'); cap.className = 'cap'; cap.textContent = caption;
+  wrap.append(sel, cap);
+  return wrap;
+}
+const toggleViews = {};
+function makeDot(id, label) {
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'dot'; b.textContent = label;
+  const sync = () => b.setAttribute('aria-pressed', String(!!F[id]));
+  b.addEventListener('click', () => { F[id] = !F[id]; sync(); applyAudio('patina'); });
+  toggleViews[id] = sync; sync();
+  return b;
+}
+function labelEl(id, text, fine) {
+  const el = document.createElement(fine ? 'button' : 'span');
+  el.className = 'lab';
+  if (fine) { el.type = 'button'; el.dataset.fine = id; el.setAttribute('aria-expanded', 'false'); el.setAttribute('aria-haspopup', 'dialog'); }
+  el.innerHTML = `<i class="hue"></i>${text}${fine ? '<span class="tri">▾</span>' : ''}`;
+  return el;
+}
+function valEl(id) { const v = document.createElement('div'); v.className = 'val'; const f = fmtFor(id); onView(id, x => { v.textContent = f(x); }); return v; }
+
+// row 1: blend, big three, level
+(() => {
+  const tb = $('#tBlend');
+  const top = document.createElement('span'); top.className = 'cap'; top.textContent = 'Bell';
+  const bot = document.createElement('span'); bot.className = 'cap'; bot.textContent = 'Tine';
+  tb.append(top, makeVS('blend', 'Tine and bell blend', true, tb), bot, labelEl('blend', 'Blend', false), valEl('blend'));
+  for (const id of ['warmth', 'bark', 'body']) {
+    const t = $(`.tile[data-k="${id}"]`); t.style.setProperty('--hue', HUES[id]);
+    t.append(makeKnob(id, INFO[id].name, 'outline', t), labelEl(id, INFO[id].name, true), valEl(id));
+  }
+  const tl = $('#tLevel');
+  tl.append(makeVS('volume', 'Level', false, tl), labelEl('volume', 'Level', false), valEl('volume'));
+})();
+// row 2: dust, bell panel, mechanics
+(() => {
+  for (const [id, name] of [['dust', 'Dust'], ['mech', 'Mechanics']]) {
+    const t = $(`.tile[data-k="${id}"]`); t.style.setProperty('--hue', id === 'dust' ? '#cdbfa6' : '#ebe7e1');
+    t.append(makeKnob(id, name, 'ring', t), labelEl(id, name, false), valEl(id));
+  }
+  const tb = $('#tBell');
+  tb.append(labelEl('bell', 'Bell', false));
+  const opts = document.createElement('div'); opts.className = 'opts';
+  opts.append(
+    makeDD('bellVoice', 'Voice', ['Celeste', 'Vibes', 'Both']),
+    makeDD('bellOctave', 'Octave', [{ value: '0', label: '0' }, { value: '+1', label: '+1' }]),
+    makeDD('bellRange', 'From key', [36, 41, 48, 53, 60].map(n => ({ value: String(n), label: noteName(n) }))),
+  );
+  tb.append(opts);
+})();
+// row 3: patina, motion, space, signal
+(() => {
+  const tp = $('.tile[data-k="patina"]'); tp.style.setProperty('--hue', HUES.patina);
+  const kp = document.createElement('div'); kp.className = 'kcol';
+  kp.append(makeKnob('patina', 'Patina', 'ring', tp), labelEl('patina', 'Patina', false), valEl('patina'));
+  const dots = document.createElement('div'); dots.className = 'dots';
+  dots.append(makeDot('wow', 'Wow'), makeDot('flutter', 'Flutter'), makeDot('narrow', 'Narrow'));
+  tp.append(kp, dots);
+
+  const tm = $('.tile[data-k="motion"]'); tm.style.setProperty('--hue', HUES.motion);
+  const km = document.createElement('div'); km.className = 'kcol';
+  km.append(makeKnob('motion', 'Motion', 'ring', tm), labelEl('motion', 'Motion', false), valEl('motion'));
+  const mo = document.createElement('div'); mo.className = 'kcol';
+  mo.append(makeDD('motionMode', 'Mode', ['Vibrato', 'Chorus', 'Both']), makeDD('motionHz', 'Rate', ['0.5', '1', '1.6', '2.5', '4', '6', '8'].map(h => ({ value: h, label: h + ' Hz' }))));
+  tm.append(km, mo);
+
+  const ts = $('.tile[data-k="space"]'); ts.style.setProperty('--hue', HUES.space);
+  const ks = document.createElement('div'); ks.className = 'kcol';
+  ks.append(makeKnob('space', 'Space', 'ring', ts), labelEl('space', 'Space', true), valEl('space'));
+  ts.append(ks, makeDD('spaceType', 'Type', ['Spring', 'Plate', 'Room']));
+
+  const tg = $('#tSignal');
+  const sig = document.createElement('div'); sig.className = 'sig';
+  for (const [id, n] of [['di', 'DI'], ['amp', 'Amp'], ['room', 'Room']]) {
+    const col = document.createElement('div'); col.className = 'vstack';
+    const c = document.createElement('span'); c.className = 'lab'; c.textContent = n;
+    col.append(makeVS(id, n + ' level', false, tg), c); sig.append(col);
+  }
+  const cap = document.createElement('span'); cap.className = 'cap'; cap.textContent = 'Signal';
+  tg.append(sig, cap);
+})();
+
+// legend
+(() => {
+  const body = $('#legendBody');
+  for (const id of ['warmth', 'bark', 'body', 'patina', 'motion', 'space', 'blend', 'dust']) {
+    const m = INFO[id], c = id === 'blend' ? HUES.bell : id === 'dust' ? '#cdbfa6' : HUES[id];
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td><span class="sw" style="--c:${c}"></span>${m.name}</td><td>${m.sound}</td><td>${m.picture}</td>`;
+    body.append(tr);
+  }
+})();
+
+// fine-control popover (▾)
+const win = $('#win'), fine = $('#fine');
+let fineKey = null;
+function closeFine() {
+  fine.hidden = true; fineKey = null;
+  document.querySelectorAll('[data-fine]').forEach(b => b.setAttribute('aria-expanded', 'false'));
+}
+function openFine(key, anchor) {
+  if (fineKey === key) { closeFine(); return; }
+  closeMenu();
+  fineKey = key; fine.innerHTML = ''; fine.setAttribute('aria-label', INFO[key].name + ' fine controls');
+  const head = document.createElement('div'); head.className = 'head';
+  head.innerHTML = `<b>${INFO[key].name}</b>`;
+  const x = document.createElement('button'); x.type = 'button'; x.className = 'x'; x.setAttribute('aria-label', 'Close'); x.textContent = '✕';
+  x.addEventListener('click', closeFine); head.append(x); fine.append(head);
+  for (const c of FINE[key]) {
+    if (c.options) { const dd = makeDD(c.id, c.label, c.options); fine.append(dd); continue; }
+    const box = document.createElement('div'); box.className = 'ctl';
+    const fmt = c.fmt || (v => String(Math.round(v * 100)));
+    box.innerHTML = `<label for="f-${c.id}"><span>${c.label}</span><output>${fmt(F[c.id])}</output></label>`;
+    const r = document.createElement('input'); r.type = 'range'; r.id = 'f-' + c.id; r.min = '0'; r.max = '1000'; r.value = String(Math.round(F[c.id] * 1000));
+    const out = box.querySelector('output');
+    r.addEventListener('input', () => { F[c.id] = +r.value / 1000; out.textContent = fmt(F[c.id]); applyAudio(c.id); });
+    box.append(r); fine.append(box);
+  }
+  fine.hidden = false;
+  const wr = win.getBoundingClientRect(), tr = anchor.closest('.tile').getBoundingClientRect();
+  const w = fine.offsetWidth, h = fine.offsetHeight;
+  let left = tr.left - wr.left + tr.width / 2 - w / 2, top = tr.bottom - wr.top + 8;
+  if (top + h > wr.height - 8) top = tr.top - wr.top - h - 8;
+  fine.style.left = clamp(left, 8, wr.width - w - 8) + 'px'; fine.style.top = Math.max(8, top) + 'px';
+  document.querySelectorAll('[data-fine]').forEach(b => b.setAttribute('aria-expanded', String(b.dataset.fine === key)));
+}
+document.querySelectorAll('[data-fine]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); openFine(b.dataset.fine, b); }));
+
+// menu
+const menu = $('#menu'), menuBtn = $('#menuBtn');
+function closeMenu() { menu.hidden = true; menuBtn.setAttribute('aria-expanded', 'false'); }
+menuBtn.addEventListener('click', e => { e.stopPropagation(); const show = menu.hidden; closeFine(); menu.hidden = !show; menuBtn.setAttribute('aria-expanded', String(show)); });
+document.addEventListener('click', e => { if (!e.target.closest('.pop')) { closeMenu(); closeFine(); } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeMenu(); closeFine(); } });
+for (const [host, id, label] of [['#menuTune', 'tune', 'Tune'], ['#menuTouch', 'touch', 'Touch']]) {
+  const box = $(host), f = id === 'touch' ? (v => v < .35 ? 'even' : v > .65 ? 'dynamic' : 'natural') : fmtFor(id);
+  box.innerHTML = `<label for="m-${id}"><span>${label}</span><output></output></label>`;
+  const r = document.createElement('input'); r.type = 'range'; r.id = 'm-' + id; r.min = '0'; r.max = '1000';
+  const out = box.querySelector('output');
+  onView(id, v => { r.value = String(Math.round(v * 1000)); out.textContent = f(v); });
+  r.addEventListener('input', () => setP(id, +r.value / 1000));
+  box.append(r);
+}
+const reduceMotion = window.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)').matches : false;
+let still = reduceMotion;
+const stillToggle = $('#stillToggle');
+stillToggle.setAttribute('aria-pressed', String(still));
+stillToggle.addEventListener('click', () => { still = !still; stillToggle.setAttribute('aria-pressed', String(still)); });
+
+// presets
+const presetSel = $('#preset');
+let presetIndex = 0;
+PRESETS.forEach((p, i) => { const o = document.createElement('option'); o.value = String(i); o.textContent = p.name; presetSel.append(o); });
+function loadPreset(i) {
+  presetIndex = (i + PRESETS.length) % PRESETS.length;
+  presetSel.value = String(presetIndex);
+  const p = PRESETS[presetIndex];
+  Object.assign(F, FINE_DEFAULTS, p.f);
+  Object.values(ddViews).forEach(fn => fn()); Object.values(toggleViews).forEach(fn => fn());
+  if (fineKey) { const k = fineKey; closeFine(); openFine(k, $(`[data-fine="${k}"]`)); }
+  tweenTo({ ...p.v });
+  ['warmth', 'body', 'patina', 'motion', 'space', 'spaceType'].forEach(applyAudio);
+}
+presetSel.addEventListener('change', () => loadPreset(+presetSel.value));
+$('#prevPreset').addEventListener('click', () => loadPreset(presetIndex - 1));
+$('#nextPreset').addEventListener('click', () => loadPreset(presetIndex + 1));
+$('#nextPresetTop').addEventListener('click', () => loadPreset(presetIndex + 1));
+
+// keys toggle
+const keysEl = $('#keys'), keysToggle = $('#keysToggle');
+keysToggle.addEventListener('click', () => { keysEl.hidden = !keysEl.hidden; keysToggle.setAttribute('aria-pressed', String(!keysEl.hidden)); });
+
+// ============================================================ audio (a small stand-in synth)
+let A = null;
+const voices = [];
+function shaperCurve(kind, amt) {
+  const N = 1024, c = new Float32Array(N); amt = clamp(amt, 0, 1.5);
+  const k = 1 + amt * 6, ref = .25;
+  const o = kind === 'bark' ? amt * .5 : kind === 'tube' ? amt * .18 : 0;
+  const mixAmt = clamp(amt * 1.4, 0, 1);
+  const off = Math.tanh(k * o), norm = ref / Math.max(1e-6, Math.tanh(k * (ref + o)) - off);
+  const kt = k * 1.4, normT = ref / Math.tanh(kt * ref);
+  for (let i = 0; i < N; i++) {
+    const x = i / (N - 1) * 2 - 1;
+    const y = kind === 'transistor' ? Math.tanh(kt * x) * normT : (Math.tanh(k * (x + o)) - off) * norm;
+    c[i] = x + (y - x) * mixAmt;
+  }
+  return c;
+}
+function makeIR(ctx, type, secs) {
+  const sr = ctx.sampleRate, len = Math.max(1, Math.floor(sr * secs)), buf = ctx.createBuffer(2, len, sr);
+  const bright = type === 'Plate' ? .72 : type === 'Spring' ? .5 : .3, tau = secs / 6.9;
+  for (let ch = 0; ch < 2; ch++) {
+    const d = buf.getChannelData(ch); let lp = 0;
+    const rep = .031 + ch * .0035;
+    for (let i = 0; i < len; i++) {
+      const t = i / sr; lp += ((Math.random() * 2 - 1) - lp) * bright;
+      let s = lp * Math.exp(-t / tau);
+      if (type === 'Spring') {
+        s *= .65 + .35 * Math.sin(2 * Math.PI * (36 + ch * 5) * t);
+        if ((t % rep) / rep < .012) s += (Math.random() * 2 - 1) * .5 * Math.exp(-t / (tau * .8));
+      }
+      if (i < sr * .002) s *= i / (sr * .002);
+      d[i] = s;
+    }
+    if (type === 'Room') [.011, .017, .023, .031, .043, .052].forEach((tp, j) => {
+      const idx = Math.floor((tp + ch * .0013) * sr); if (idx < len) d[idx] += (.55 - j * .07) * (j % 2 ? -1 : 1);
+    });
+  }
+  return buf;
+}
+function makeDust(ctx) {
+  const sr = ctx.sampleRate, len = sr * 4, b = ctx.createBuffer(2, len, sr);
+  for (let ch = 0; ch < 2; ch++) {
+    const d = b.getChannelData(ch); let prev = 0;
+    for (let i = 0; i < len; i++) {
+      const w = Math.random() * 2 - 1; d[i] += (w - prev) * .11; prev = w;
+      if (Math.random() < 7 / sr && i < len - 3) { const a = Math.pow(Math.random(), 2) * .8; d[i] += a; d[i + 1] -= a * .6; d[i + 2] += a * .25; }
+    }
+  }
+  return b;
+}
+function audio() {
+  if (A) { if (A.ctx.state === 'suspended') A.ctx.resume(); return A; }
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return null;
+  const ctx = new AC({ latencyHint: 'interactive' });
+  const gain = v => { const g = ctx.createGain(); g.gain.value = v; return g; };
+  const biquad = (type, f, q = .7, g = 0) => { const b = ctx.createBiquadFilter(); b.type = type; b.frequency.value = f; b.Q.value = q; b.gain.value = g; return b; };
+  const osc = f => { const o = ctx.createOscillator(); o.frequency.value = f; o.start(); return o; };
+  const a = { ctx };
+  a.voiceBus = gain(1);
+  a.di = gain(1); a.amp = gain(0); a.room = gain(0);
+  const ampDrive = ctx.createWaveShaper(); ampDrive.curve = shaperCurve('tube', .9); ampDrive.oversample = '2x';
+  const roomConv = ctx.createConvolver(); roomConv.buffer = makeIR(ctx, 'Room', .45);
+  a.voiceBus.connect(a.di);
+  a.voiceBus.connect(ampDrive).connect(biquad('highpass', 90)).connect(biquad('peaking', 900, 1, 3.5)).connect(biquad('lowpass', 4200)).connect(a.amp);
+  a.voiceBus.connect(roomConv).connect(a.room);
+  const pre = gain(1); a.di.connect(pre); a.amp.connect(pre); a.room.connect(pre);
+  a.bark = ctx.createWaveShaper(); a.bark.oversample = '2x';
+  a.bodyLow = biquad('lowshelf', 170); a.bodyMid = biquad('peaking', 330, .9);
+  a.warmSat = ctx.createWaveShaper(); a.warmSat.oversample = '2x';
+  a.warmLow = biquad('lowshelf', 260); a.warmHigh = biquad('highshelf', 3200);
+  pre.connect(a.bark); a.bark.connect(a.bodyLow); a.bodyLow.connect(a.bodyMid); a.bodyMid.connect(a.warmSat);
+  a.warmSat.connect(a.warmLow); a.warmLow.connect(a.warmHigh);
+  a.panner = ctx.createStereoPanner();
+  a.vibLfo = osc(3); a.vibDepth = gain(0); a.vibLfo.connect(a.vibDepth).connect(a.panner.pan);
+  a.warmHigh.connect(a.panner);
+  const mixMo = gain(1); a.panner.connect(mixMo);
+  a.chDelay = ctx.createDelay(.05); a.chDelay.delayTime.value = .012;
+  a.chLfo = osc(.6); a.chDepth = gain(.002); a.chLfo.connect(a.chDepth).connect(a.chDelay.delayTime);
+  a.chWet = gain(0); a.panner.connect(a.chDelay); a.chDelay.connect(a.chWet).connect(mixMo);
+  a.patSat = ctx.createWaveShaper(); a.patSat.oversample = '2x';
+  a.patHP = biquad('highpass', 25); a.patLP = biquad('lowpass', 18000, .6);
+  mixMo.connect(a.patSat); a.patSat.connect(a.patHP); a.patHP.connect(a.patLP);
+  a.wowLfo = osc(.55); a.wow = gain(0); a.wowLfo.connect(a.wow);
+  a.flutLfo = osc(6.8); a.flut = gain(0); a.flutLfo.connect(a.flut);
+  a.tuneSrc = ctx.createConstantSource ? ctx.createConstantSource() : null;
+  if (a.tuneSrc) { a.tuneSrc.offset.value = 0; a.tuneSrc.start(); }
+  a.vibesLfo = osc(5.6); a.vibesDepth = gain(.3); a.vibesLfo.connect(a.vibesDepth);
+  a.master = gain(.75);
+  a.preDelay = ctx.createDelay(.5); a.conv = ctx.createConvolver(); a.wetTone = biquad('lowpass', 8000); a.wet = gain(0);
+  a.patLP.connect(a.master); a.patLP.connect(a.preDelay); a.preDelay.connect(a.conv); a.conv.connect(a.wetTone); a.wetTone.connect(a.wet); a.wet.connect(a.master);
+  const dust = ctx.createBufferSource(); dust.buffer = makeDust(ctx); dust.loop = true;
+  a.dustGain = gain(0); dust.connect(a.dustGain).connect(a.master); dust.start();
+  const lim = ctx.createDynamicsCompressor();
+  lim.threshold.value = -8; lim.knee.value = 6; lim.ratio.value = 6; lim.attack.value = .003; lim.release.value = .2;
+  a.master.connect(lim).connect(ctx.destination);
+  a.noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+  { const d = a.noise.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
+  A = a;
+  applyAll();
+  return A;
+}
+function groupOf(id) {
+  if (id === 'di' || id === 'amp' || id === 'room') return 'signal';
+  if (id === 'spaceType' || id === 'spaceDecay') return 'spaceIR';
+  if (id === 'wow' || id === 'flutter' || id === 'narrow') return 'patina';
+  for (const k of ['warmth', 'bark', 'body', 'patina', 'motion', 'space']) if (id.startsWith(k)) return k;
+  return id;
+}
+let irTimer = 0;
+function applyAudio(id) {
+  if (!A) return;
+  const t = A.ctx.currentTime;
+  const set = (p, v, tc = .04) => { p.cancelScheduledValues(t); p.setTargetAtTime(v, t, tc); };
+  switch (groupOf(id)) {
+    case 'bark': A.bark.curve = shaperCurve('bark', S.bark); break;
+    case 'body': set(A.bodyLow.gain, S.body * 7); set(A.bodyMid.gain, S.body * F.bodyRes * 9); break;
+    case 'warmth':
+      A.warmSat.curve = shaperCurve(F.warmthChar === 'Tube' ? 'tube' : 'transistor', S.warmth * F.warmthDrive * 2);
+      set(A.warmLow.gain, S.warmth * 4.5); set(A.warmHigh.gain, -S.warmth * F.warmthTilt * 18); break;
+    case 'motion': {
+      const rate = +F.motionHz;
+      set(A.vibLfo.frequency, rate); set(A.chLfo.frequency, .25 + rate * .12);
+      set(A.vibDepth.gain, F.motionMode !== 'Chorus' ? S.motion * .9 : 0);
+      set(A.chWet.gain, F.motionMode !== 'Vibrato' ? Math.min(1, S.motion * 1.1) * .7 : 0);
+      set(A.chDepth.gain, .001 + S.motion * .0035); break;
+    }
+    case 'patina': {
+      const p = S.patina, age = F.narrow ? p : 0;
+      set(A.wow.gain, F.wow ? p * 14 : 0); set(A.flut.gain, F.flutter ? p * 3 : 0);
+      set(A.patLP.frequency, 18000 * Math.pow(3200 / 18000, age)); set(A.patHP.frequency, 20 + age * 170);
+      A.patSat.curve = shaperCurve('tube', p * .7); break;
+    }
+    case 'space':
+      set(A.wet.gain, Math.pow(S.space, 1.3) * 1.1); set(A.preDelay.delayTime, F.spacePre * .12);
+      set(A.wetTone.frequency, 1800 * Math.pow(6, F.spaceTone)); break;
+    case 'spaceIR':
+      clearTimeout(irTimer);
+      irTimer = setTimeout(() => {
+        const base = .5 + F.spaceDecay * 3.5, mul = F.spaceType === 'Spring' ? .7 : F.spaceType === 'Room' ? .45 : 1;
+        A.conv.buffer = makeIR(A.ctx, F.spaceType, base * mul);
+      }, 120); break;
+    case 'dust': set(A.dustGain.gain, S.dust * S.dust * .16); break;
+    case 'signal': set(A.di.gain, S.di); set(A.amp.gain, S.amp * .8); set(A.room.gain, S.room * 1.4); break;
+    case 'tune': if (A.tuneSrc) set(A.tuneSrc.offset, (S.tune - .5) * 100); break;
+    case 'volume': set(A.master.gain, Math.pow(S.volume / .8, 2) * .75); break;
+  }
+}
+function applyAll() { ['bark', 'body', 'warmth', 'motion', 'patina', 'space', 'spaceIR', 'dust', 'di', 'tune', 'volume'].forEach(applyAudio); }
+function holdAt(p, t) {
+  if (p.cancelAndHoldAtTime) p.cancelAndHoldAtTime(t);
+  else { const v = p.value; p.cancelScheduledValues(t); p.setValueAtTime(v, t); }
+}
+function thump(t, level, freq, tau, q = .9) {
+  if (level <= 0) return;
+  const ctx = A.ctx, s = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), g = ctx.createGain();
+  s.buffer = A.noise; bp.type = 'bandpass'; bp.frequency.value = freq; bp.Q.value = q;
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(level, t + .002); g.gain.setTargetAtTime(0, t + .002, tau);
+  s.connect(bp).connect(g).connect(A.voiceBus);
+  s.start(t, Math.random() * .5); s.stop(t + tau * 10 + .02);
+  s.onended = () => g.disconnect();
+}
+function addOsc(v, f) {
+  const o = A.ctx.createOscillator(); o.frequency.value = f;
+  if (!A.tuneSrc) o.detune.value = (S.tune - .5) * 100;
+  A.wow.connect(o.detune); A.flut.connect(o.detune); if (A.tuneSrc) A.tuneSrc.connect(o.detune);
+  o.start(v.t0); v.oscs.push(o); return o;
+}
+const velCurve = vel => Math.pow(clamp(vel, 0, 1), lerp(.45, 1.8, S.touch));
+const layerGains = () => ({ tine: S.blend <= .5 ? 1 : (1 - S.blend) * 2, bell: S.blend >= .5 ? 1 : S.blend * 2 });
+const bellVoiceFor = note => F.bellVoice === 'Both' ? (note < 60 ? 'Vibes' : 'Celeste') : F.bellVoice;
+function tineLayer(v, note, vel, g) {
+  const ctx = A.ctx, t = v.t0, f = mtof(note);
+  const env = ctx.createGain(); env.connect(v.out);
+  const amp = .15 * g * (.25 + .75 * vel);
+  const T60 = clamp(10 - (note - 28) * .13, 1.6, 10), tau = T60 / 6.9;
+  env.gain.setValueAtTime(0, t); env.gain.linearRampToValueAtTime(amp, t + .002); env.gain.setTargetAtTime(0, t + .002, tau);
+  const car = addOsc(v, f), mod = addOsc(v, f), modG = ctx.createGain();
+  const barkAmt = S.bark * (.35 + 1.3 * F.barkVel * vel);
+  modG.gain.setValueAtTime(f * (.3 + 1.3 * vel + 2.2 * barkAmt), t);
+  modG.gain.setTargetAtTime(f * .1 * (.5 + vel), t, .1 + .35 * (1 - vel));
+  mod.connect(modG); modG.connect(car.frequency); car.connect(env);
+  const dbl = S.body * F.bodyDouble;
+  if (dbl > .02) {
+    const c2 = addOsc(v, f); c2.detune.value = 5; const g2 = ctx.createGain(); g2.gain.value = dbl * .7;
+    modG.connect(c2.frequency); c2.connect(g2).connect(env);
+  }
+  if (f * 7.08 < 16000) {
+    const ding = addOsc(v, f * 7.08), dG = ctx.createGain();
+    const dAmp = amp * .5 * (.2 + vel) * F.barkDing * 2 * clamp(1.4 - (note - 40) / 50, .2, 1.2);
+    dG.gain.setValueAtTime(0, t); dG.gain.linearRampToValueAtTime(dAmp, t + .001); dG.gain.setTargetAtTime(0, t + .001, .025);
+    ding.connect(dG).connect(v.out);
+  }
+  v.env.push({ p: env.gain, tau: .07 });
+  v.natural = Math.max(v.natural, T60 * 1.1);
+  thump(t, .05 * S.mech * Math.pow(vel, 1.5), 180, .02);
+}
+function bellLayer(v, note, vel, g) {
+  const ctx = A.ctx, t = v.t0, kind = bellVoiceFor(note);
+  let n = note + (F.bellOctave === '+1' ? 12 : 0);
+  if (kind === 'Celeste' && n < 60) n += 12;
+  const f = mtof(n), decay = .5 + F.bellDecay;
+  const parts = kind === 'Celeste' ? [[1, 1, 1.1], [4, .22, .09], [9.2, .08, .03]] : [[1, 1, 2.6], [3.98, .3, .45], [10.1, .07, .09]];
+  const env = ctx.createGain(); env.gain.value = 1;
+  if (kind === 'Vibes') { const trem = ctx.createGain(); trem.gain.value = .82; A.vibesDepth.connect(trem.gain); env.connect(trem); trem.connect(v.out); v.trem = trem; }
+  else env.connect(v.out);
+  const amp = .11 * g * (.3 + .7 * vel);
+  let longest = 0;
+  for (const [r, pa, tau0] of parts) {
+    if (f * r > 17000) continue;
+    const o = addOsc(v, f * r), gg = ctx.createGain(), tau = tau0 * decay * Math.pow(440 / f, .35);
+    gg.gain.setValueAtTime(0, t); gg.gain.linearRampToValueAtTime(amp * pa, t + .001); gg.gain.setTargetAtTime(0, t + .001, tau);
+    o.connect(gg).connect(env); longest = Math.max(longest, tau);
+  }
+  v.env.push({ p: env.gain, tau: kind === 'Vibes' ? .22 : .12 });
+  v.natural = Math.max(v.natural, longest * 7);
+  if (kind === 'Celeste') thump(t, .02 * S.mech * vel, 2400, .006, 1.4);
+}
+function startVoice(note, vel) {
+  const a = audio(); if (!a) return null;
+  const ctx = a.ctx, t = ctx.currentTime + .004;
+  for (const v of voices) if (v.note === note && !v.released) releaseVoice(v, t, .04);
+  while (voices.length >= 32) releaseVoice(voices.shift(), t, .015, true);
+  const L = layerGains(), vv = velCurve(vel);
+  const out = ctx.createGain(), pan = ctx.createStereoPanner();
+  pan.pan.value = clamp((note - 66) / 30, -1, 1) * F.bodyWidth * 2 * (.25 + S.body * .6) * .8;
+  out.connect(pan).connect(a.voiceBus);
+  const v = { note, t0: t, out, pan, oscs: [], env: [], natural: .5, released: false, sustained: false };
+  if (L.tine > .001) tineLayer(v, note, vv, L.tine);
+  const rangeFade = clamp((note - +F.bellRange + 6) / 6, 0, 1);
+  if (L.bell > .001 && rangeFade > 0) bellLayer(v, note, vv, L.bell * rangeFade);
+  if (!v.oscs.length) { try { out.disconnect(); pan.disconnect(); } catch (_) {} return null; }
+  const end = t + v.natural;
+  v.oscs.forEach(o => o.stop(end));
+  v.oscs[0].onended = () => cleanupVoice(v);
+  voices.push(v);
+  return v;
+}
+function releaseVoice(v, when, fast, stolen) {
+  if (!v || v.released) return;
+  v.released = true;
+  const t = when ?? A.ctx.currentTime;
+  let longest = 0;
+  for (const e of v.env) { const tau = fast || e.tau; holdAt(e.p, t); e.p.setTargetAtTime(0, t, tau); longest = Math.max(longest, tau); }
+  const end = t + longest * 9 + .03;
+  v.oscs.forEach(o => { try { o.stop(end); } catch (_) {} });
+  if (!fast) thump(t, .025 * S.mech, 320, .03);
+  if (stolen) { const i = voices.indexOf(v); if (i >= 0) voices.splice(i, 1); }
+}
+function cleanupVoice(v) {
+  for (const o of v.oscs) {
+    try { A.wow.disconnect(o.detune); } catch (_) {}
+    try { A.flut.disconnect(o.detune); } catch (_) {}
+    if (A.tuneSrc) try { A.tuneSrc.disconnect(o.detune); } catch (_) {}
+  }
+  if (v.trem) try { A.vibesDepth.disconnect(v.trem.gain); } catch (_) {}
+  try { v.out.disconnect(); v.pan.disconnect(); } catch (_) {}
+  const i = voices.indexOf(v); if (i >= 0) voices.splice(i, 1);
+}
+
+// ============================================================ notes: audio + light
+let pedalDown = false;
+const held = {}, glowsByNote = {}, keyEls = {};
+function noteOn(note, vel = .7) {
+  held[note] = (held[note] || 0) + 1;
+  keyEls[note] && keyEls[note].classList.add('on');
+  const v = startVoice(note, vel);
+  spawnGlow(note, vel, v ? v.natural : 3);
+}
+function noteOff(note) {
+  if (!held[note]) return;
+  held[note]--;
+  if (held[note] > 0) return;
+  keyEls[note] && keyEls[note].classList.remove('on');
+  if (pedalDown) { voices.forEach(v => { if (v.note === note && !v.released) v.sustained = true; }); return; }
+  const g = glowsByNote[note]; if (g) g.tau = Math.min(g.tau, .35);
+  if (A) voices.forEach(v => { if (v.note === note && !v.released) releaseVoice(v); });
+}
+const pedalBtn = $('#pedal');
+function setPedal(down) {
+  if (down === pedalDown) return;
+  pedalDown = down; pedalBtn.setAttribute('aria-pressed', String(down));
+  if (!down) voices.forEach(v => {
+    if (v.sustained && !v.released && !held[v.note]) { releaseVoice(v); const g = glowsByNote[v.note]; if (g) g.tau = Math.min(g.tau, .35); }
+  });
+}
+pedalBtn.addEventListener('click', () => setPedal(!pedalDown));
+
+const LO = 36, HI = 96;
+const isBlack = n => [1, 3, 6, 8, 10].includes(n % 12);
+(() => {
+  const kb = $('#kb');
+  let whites = 0;
+  for (let n = LO; n <= HI; n++) if (!isBlack(n)) {
+    const k = document.createElement('div'); k.className = 'wk' + (n % 12 === 0 ? ' c' : ''); k.dataset.note = n;
+    if (n % 12 === 0) k.dataset.label = noteName(n);
+    kb.append(k); keyEls[n] = k; whites++;
+  }
+  let wi = 0; const ww = 100 / whites;
+  for (let n = LO; n <= HI; n++) {
+    if (!isBlack(n)) { wi++; continue; }
+    const k = document.createElement('div'); k.className = 'bk'; k.dataset.note = n;
+    k.style.left = `${(wi * ww - ww * .31).toFixed(3)}%`; k.style.width = `${(ww * .62).toFixed(3)}%`;
+    kb.append(k); keyEls[n] = k;
+  }
+  const active = new Map();
+  const velFrom = (e, k) => { const r = k.getBoundingClientRect(); return clamp(.3 + .65 * (e.clientY - r.top) / r.height, .2, 1); };
+  const press = (id, n, vel) => { active.set(id, n); noteOn(n, vel); };
+  const lift = id => { if (active.has(id)) { noteOff(active.get(id)); active.delete(id); } };
+  kb.addEventListener('pointerdown', e => {
+    const k = e.target.closest('[data-note]'); if (!k) return;
+    e.preventDefault();
+    if (e.target.hasPointerCapture && e.target.hasPointerCapture(e.pointerId)) e.target.releasePointerCapture(e.pointerId);
+    press(e.pointerId, +k.dataset.note, velFrom(e, k));
+  });
+  kb.addEventListener('pointerover', e => {
+    if (!active.has(e.pointerId)) return;
+    const k = e.target.closest('[data-note]'); if (!k) return;
+    const n = +k.dataset.note; if (active.get(e.pointerId) === n) return;
+    lift(e.pointerId); press(e.pointerId, n, velFrom(e, k));
+  });
+  kb.addEventListener('pointerleave', e => lift(e.pointerId));
+  window.addEventListener('pointerup', e => lift(e.pointerId));
+  window.addEventListener('pointercancel', e => lift(e.pointerId));
+})();
+
+let base = 48;
+const KMAP = { a: 0, w: 1, s: 2, e: 3, d: 4, f: 5, t: 6, g: 7, y: 8, h: 9, u: 10, j: 11, k: 12, o: 13, l: 14, p: 15, ';': 16, "'": 17 };
+const pcDown = new Map();
+function markPcRange() {
+  Object.entries(keyEls).forEach(([n, el]) => el.classList.toggle('pc', +n >= base && +n <= base + 17 && !isBlack(+n)));
+  $('#pcRange').textContent = `Computer keys ${noteName(base)} – ${noteName(base + 17)} · Z / X octave`;
+}
+markPcRange();
+window.addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const t = e.target;
+  if (t && t.closest && t.closest('input, textarea, select, [contenteditable]')) return;
+  const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+  if (key === ' ') {
+    if (t && t.closest && t.closest('button, a')) return;
+    e.preventDefault(); if (!e.repeat) setPedal(true); return;
+  }
+  if (e.repeat) return;
+  if (key === 'z' || key === 'x') { base = clamp(base + (key === 'z' ? -12 : 12), 24, 84); markPcRange(); return; }
+  if (!(key in KMAP) || pcDown.has(key)) return;
+  const n = base + KMAP[key]; pcDown.set(key, n); noteOn(n, .72);
+});
+window.addEventListener('keyup', e => {
+  const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+  if (key === ' ') { setPedal(false); return; }
+  if (pcDown.has(key)) { noteOff(pcDown.get(key)); pcDown.delete(key); }
+});
+window.addEventListener('blur', () => { pcDown.forEach(n => noteOff(n)); pcDown.clear(); setPedal(false); });
+
+(() => {
+  const btn = $('#playPhrase'), b = 60 / 72, ev = [];
+  const chord = (t, notes, dur, vel = .62) => notes.forEach((n, i) => ev.push({ t: t + i * .02, n, d: dur - i * .02, v: vel + (i === notes.length - 1 ? .1 : 0) }));
+  chord(0, [43, 58, 62, 65, 69], 2 * b);          // Gm9
+  chord(2 * b, [48, 58, 64, 69, 74], 2 * b);      // C13
+  chord(4 * b, [41, 57, 64, 67, 72], 2 * b, .58); // Fmaj9
+  chord(6 * b, [50, 60, 65, 69, 76], 2 * b, .6);  // Dm9
+  [[7.5, 79, .5], [8, 81, .5], [8.5, 84, 1], [9.5, 76, .5]].forEach(([t, n, d]) => ev.push({ t: t * b, n, d: d * b, v: .7 }));
+  chord(10 * b, [46, 57, 62, 65, 69], 4 * b, .55); // Bbmaj7
+  ev.push({ t: 10 * b, n: 77, d: 4 * b, v: .72 });
+  const total = Math.max(...ev.map(e => e.t + e.d)) + .4;
+  btn.addEventListener('click', () => {
+    audio(); btn.disabled = true;
+    ev.forEach(e => { setTimeout(() => noteOn(e.n, e.v), e.t * 1000); setTimeout(() => noteOff(e.n), (e.t + e.d) * 1000); });
+    setTimeout(() => { btn.disabled = false; }, total * 1000);
+  });
+})();
+
+// ============================================================ the field: smeared light on navy
+const field = $('#field'), fx = field.getContext('2d');
+const specks = $('#specks'), sx = specks.getContext('2d');
+const grainEl = $('#grain'), vignetteEl = $('#vignette');
+function mulberry32(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const rnd = mulberry32(23);
+const FORM_DEFS = [['warmth', '#d64a3a'], ['warmth', '#c2412f'], ['bark', '#e8263f'], ['body', '#b02a84'], ['body', '#7e2496'],
+  ['patina', '#93708a'], ['motion', '#6a46dc'], ['space', '#2856b0'], ['space', '#14606e']];
+const FORMS = FORM_DEFS.map(([id, hex], i) => ({
+  id, rgb: rgbOf(hex),
+  cx: (i + .5) / FORM_DEFS.length * .9 + .05 + (rnd() - .5) * .1, cy: .2 + rnd() * .55,
+  ax: .08 + rnd() * .18, ay: .06 + rnd() * .14, fx: .4 + rnd() * .8, fy: .3 + rnd() * .7,
+  px: rnd() * 6.283, py: rnd() * 6.283, size: .22 + rnd() * .16,
+  rot: rnd() * 3.14, rs: (rnd() - .5) * .5, stretch: 1.5 + rnd() * 1.4,
+}));
+const SPECKS = Array.from({ length: 110 }, () => ({ x: rnd(), y: rnd(), a: .15 + rnd() * .55, r: .4 + rnd() * .9, ph: rnd() * 6.28, sp: .5 + rnd() * 2 }));
+const glows = [], sparks = [];
+const TINE_RGB = [255, 112, 124], CELESTE_RGB = rgbOf(HUES.bell), VIBES_RGB = rgbOf(HUES.vibes);
+const noteX = n => clamp((n - 30) / 70, .04, .96);
+function spawnGlow(note, vel, natural, visualOnly) {
+  const L = layerGains(), share = L.bell / Math.max(.001, L.tine + L.bell);
+  const bellRgb = bellVoiceFor(note) === 'Vibes' ? VIBES_RGB : CELESTE_RGB;
+  const g = { note, x: noteX(note), y: .58 + (rnd() - .5) * .08, v: vel, e: .25 + .75 * vel, tau: clamp(natural / 4, .6, visualOnly ? 6 : 2.6), rgb: mix3(TINE_RGB, bellRgb, share * .7) };
+  glows.push(g); glowsByNote[note] = g;
+  const count = Math.round(L.bell * (3 + vel * 7));
+  for (let i = 0; i < count; i++) {
+    const life = (bellVoiceFor(note) === 'Vibes' ? 1.6 : .8) + rnd() * 1.4;
+    sparks.push({ x: g.x + (rnd() - .5) * .08, y: g.y + (rnd() - .7) * .3, life, max: life, ph: rnd() * 6.28, sp: 6 + rnd() * 10, rgb: bellRgb });
+  }
+  if (glows.length > 60) glows.shift();
+}
+function form(x, y, r, rot, stretch, rgb, a) {
+  if (a <= .002 || r <= .5) return;
+  const [R, G, B] = rgb.map(c => c | 0);
+  fx.save(); fx.translate(x, y); fx.rotate(rot); fx.scale(stretch, 1);
+  const g = fx.createRadialGradient(0, 0, 0, 0, 0, r);
+  g.addColorStop(0, `rgba(${R},${G},${B},${a.toFixed(3)})`);
+  g.addColorStop(.35, `rgba(${R},${G},${B},${(a * .55).toFixed(3)})`);
+  g.addColorStop(.7, `rgba(${R},${G},${B},${(a * .16).toFixed(3)})`);
+  g.addColorStop(1, `rgba(${R},${G},${B},0)`);
+  fx.fillStyle = g; fx.fillRect(-r, -r, r * 2, r * 2); fx.restore();
+}
+function sizeCanvases() {
+  const r = win.getBoundingClientRect();
+  field.width = 384; field.height = Math.max(200, Math.round(384 * r.height / Math.max(1, r.width)));
+  const s = Math.min(window.devicePixelRatio || 1, 1.5);
+  specks.width = Math.max(1, Math.round(r.width * s)); specks.height = Math.max(1, Math.round(r.height * s));
+}
+sizeCanvases();
+if (window.ResizeObserver) new ResizeObserver(sizeCanvases).observe(win); else window.addEventListener('resize', sizeCanvases);
+(() => {
+  const c = document.createElement('canvas'); c.width = c.height = 180;
+  const g = c.getContext('2d'), img = g.createImageData(180, 180);
+  for (let i = 0; i < 180 * 180; i++) { const v = Math.random() * 255 | 0; img.data[i * 4] = img.data[i * 4 + 1] = img.data[i * 4 + 2] = v; img.data[i * 4 + 3] = 255; }
+  g.putImageData(img, 0, 0); grainEl.style.backgroundImage = `url(${c.toDataURL()})`;
+})();
+
+let clock = 0, last = performance.now(), frameNo = 0, lastFilter = '';
+function render(now) {
+  const dt = clamp((now - last) / 1000, 0, .1); last = now; frameNo++;
+  const W = field.width, H = field.height, M = Math.max(W, H);
+  clock += dt * (still ? .004 : .05 + S.motion * .8);
+  // base: navy with a teal pool low-left and a dark indigo top-right
+  fx.globalCompositeOperation = 'source-over';
+  fx.fillStyle = '#06090f'; fx.fillRect(0, 0, W, H);
+  let g = fx.createRadialGradient(W * .12, H * .9, 0, W * .12, H * .9, M * .75);
+  g.addColorStop(0, 'rgba(12,58,60,.75)'); g.addColorStop(1, 'rgba(12,58,60,0)'); fx.fillStyle = g; fx.fillRect(0, 0, W, H);
+  g = fx.createRadialGradient(W * .85, H * .15, 0, W * .85, H * .15, M * .7);
+  g.addColorStop(0, 'rgba(20,24,70,.7)'); g.addColorStop(1, 'rgba(20,24,70,0)'); fx.fillStyle = g; fx.fillRect(0, 0, W, H);
+  // light forms, one or two per knob, smeared by Motion
+  fx.globalCompositeOperation = 'screen';
+  const smear = S.motion;
+  for (const f of FORMS) {
+    const v = S[f.id]; if (v < .01) continue;
+    const x = W * (f.cx + f.ax * Math.sin(f.px + clock * f.fx)), y = H * (f.cy + f.ay * Math.sin(f.py + clock * f.fy * 1.3));
+    const r = M * f.size * (.45 + .8 * v) * (.7 + S.body * .6);
+    const rot = f.rot + clock * f.rs, st = f.stretch * (1 + smear * .8);
+    const a = (.14 + .6 * v) * (f.id === 'patina' ? .6 : 1);
+    form(x, y, r, rot, st, f.rgb, a);
+    if (smear > .05) for (let k = 1; k <= 3; k++) {
+      const d = r * .28 * smear * k;
+      form(x - Math.cos(rot) * d, y - Math.sin(rot) * d, r * (1 - k * .08), rot, st, f.rgb, a * Math.pow(.45, k));
+    }
+  }
+  if (S.bark > .02) for (let i = 0; i < 2; i++) {
+    const fl = .55 + .45 * Math.sin(clock * 9 + i * 2.3) * Math.sin(clock * 5.1 + i);
+    form(W * (.38 + i * .26 + .05 * Math.sin(clock * .7 + i)), H * (.42 + .1 * Math.sin(clock * .9 + i * 1.7)), W * (.06 + .06 * S.bark), clock * .2 + i, 1.6, [255, 50, 72], S.bark * .55 * fl);
+  }
+  for (let i = glows.length - 1; i >= 0; i--) {
+    const q = glows[i];
+    q.e *= Math.exp(-dt / q.tau); q.y -= dt * .012;
+    if (q.e < .01) { glows.splice(i, 1); if (glowsByNote[q.note] === q) delete glowsByNote[q.note]; continue; }
+    const r = W * (.05 + .08 * q.v) * (.8 + S.body * .5);
+    form(q.x * W, q.y * H, r * 1.8, 1.57, 1.3, q.rgb, q.e * .45);
+    form(q.x * W, q.y * H, r * .45, 0, 1, [255, 236, 230], q.e * .45);
+  }
+  // grade inside the canvas: warmth wash, space haze, patina's lifted blacks
+  fx.globalCompositeOperation = 'soft-light';
+  fx.fillStyle = `rgba(214,74,58,${(S.warmth * .22).toFixed(3)})`; fx.fillRect(0, 0, W, H);
+  fx.globalCompositeOperation = 'screen';
+  g = fx.createRadialGradient(W * .75, H * .7, 0, W * .75, H * .7, M * .8);
+  g.addColorStop(0, `rgba(40,86,176,${(S.space * .32).toFixed(3)})`); g.addColorStop(1, 'rgba(40,86,176,0)');
+  fx.fillStyle = g; fx.fillRect(0, 0, W, H);
+  fx.globalCompositeOperation = 'source-over';
+  fx.fillStyle = `rgba(70,60,66,${(S.patina * .14).toFixed(3)})`; fx.fillRect(0, 0, W, H);
+
+  // crisp layer: film specks, bell sparkles, dust scratches
+  const SW = specks.width, SH = specks.height, sc = SW / Math.max(1, win.clientWidth);
+  sx.clearRect(0, 0, SW, SH);
+  const nSpecks = Math.round(30 + S.dust * 80);
+  for (let i = 0; i < nSpecks && i < SPECKS.length; i++) {
+    const p = SPECKS[i], tw = still ? 1 : .6 + .4 * Math.sin(p.ph + now * .001 * p.sp);
+    sx.fillStyle = `rgba(235,231,225,${(p.a * tw).toFixed(3)})`;
+    sx.beginPath(); sx.arc(p.x * SW, p.y * SH, p.r * sc, 0, 6.283); sx.fill();
+  }
+  for (let i = sparks.length - 1; i >= 0; i--) {
+    const s = sparks[i]; s.life -= dt; s.y -= dt * .02;
+    if (s.life <= 0) { sparks.splice(i, 1); continue; }
+    const tw = .5 + .5 * Math.sin(s.ph + now * .001 * s.sp), al = clamp(s.life / s.max, 0, 1) * (.35 + .65 * tw);
+    const [R, G, B] = s.rgb, X = s.x * SW, Y = s.y * SH;
+    const hg = sx.createRadialGradient(X, Y, 0, X, Y, 7 * sc);
+    hg.addColorStop(0, `rgba(${R},${G},${B},${(al * .55).toFixed(3)})`); hg.addColorStop(1, `rgba(${R},${G},${B},0)`);
+    sx.fillStyle = hg; sx.fillRect(X - 7 * sc, Y - 7 * sc, 14 * sc, 14 * sc);
+    sx.fillStyle = `rgba(255,250,240,${al.toFixed(3)})`; sx.beginPath(); sx.arc(X, Y, 1.1 * sc, 0, 6.283); sx.fill();
+  }
+  if (S.dust > .25 && !still && Math.random() < (S.dust - .25) * .5) {
+    sx.fillStyle = `rgba(235,231,225,${(.08 + Math.random() * .15).toFixed(3)})`;
+    sx.fillRect(Math.random() * SW, 0, sc, SH * (.3 + Math.random() * .7));
+  }
+
+  // CSS grade on the soft layer
+  const p = S.patina;
+  const filter = `blur(${(4 + S.space * 9).toFixed(1)}px) saturate(${(1.2 - p * .45 + S.bark * .15).toFixed(2)}) contrast(${(1.06 - p * .12).toFixed(2)}) sepia(${(p * .2).toFixed(2)})`;
+  if (filter !== lastFilter) { field.style.filter = filter; lastFilter = filter; }
+  grainEl.style.opacity = (.14 + p * .26 + S.dust * .1).toFixed(3);
+  vignetteEl.style.opacity = (.5 + p * .5).toFixed(3);
+  if (!still && frameNo % 2 === 0) grainEl.style.backgroundPosition = `${Math.random() * 180 | 0}px ${Math.random() * 180 | 0}px`;
+}
+function frame(now) { render(now); requestAnimationFrame(frame); }
+[41, 57, 64, 67, 72].forEach((n, i) => spawnGlow(n, .5 + i * .05, 20, true));
+render(performance.now()); // the first frame is complete before any animation runs
+requestAnimationFrame(frame);
+})();
+</script>

@@ -1,0 +1,18 @@
+# Formatting rules for the project. Run `clang-format -i <file>` (ships with Visual Studio)
+# or enable "format on save" in your editor. Consistent formatting keeps diffs readable.
+BasedOnStyle: LLVM
+Language: Cpp
+Standard: c++20
+IndentWidth: 4
+ColumnLimit: 110
+BreakBeforeBraces: Allman
+AllowShortFunctionsOnASingleLine: InlineOnly
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLambdasOnASingleLine: All
+PointerAlignment: Left
+SpaceBeforeParens: ControlStatements
+NamespaceIndentation: None
+FixNamespaceComments: true
+SortIncludes: CaseInsensitive
+IncludeBlocks: Preserve
+AccessModifierOffset: -4

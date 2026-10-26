@@ -1,0 +1,25 @@
+# Build output (CMake binary dirs)
+/build/
+/out/
+cmake-build-*/
+CMakeUserPresets.json
+compile_commands.json
+*.log
+
+# IDE state
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+
+# Downloaded tools (pluginval etc.)
+/tools/
+
+# Downloaded sample sets: fetch them with scripts/fetch-bell-samples.ps1 (they're CC0, just large)
+/assets/bell/celeste/*.flac
+/assets/bell/vibes/*.wav
+
+# OS junk
+.DS_Store
+Thumbs.db

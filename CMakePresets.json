@@ -1,0 +1,48 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": { "major": 3, "minor": 25, "patch": 0 },
+    "configurePresets": [
+        {
+            "name": "vs2026",
+            "displayName": "Visual Studio 2026 (x64)",
+            "description": "Windows: generates a Visual Studio solution in build/vs2026",
+            "generator": "Visual Studio 18 2026",
+            "architecture": "x64",
+            "binaryDir": "${sourceDir}/build/vs2026",
+            "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" }
+        },
+        {
+            "name": "unix",
+            "displayName": "Ninja Multi-Config (macOS / Linux)",
+            "generator": "Ninja Multi-Config",
+            "binaryDir": "${sourceDir}/build/unix",
+            "condition": { "type": "notEquals", "lhs": "${hostSystemName}", "rhs": "Windows" }
+        }
+    ],
+    "buildPresets": [
+        { "name": "debug", "configurePreset": "vs2026", "configuration": "Debug" },
+        { "name": "release", "configurePreset": "vs2026", "configuration": "Release" },
+        { "name": "unix-debug", "configurePreset": "unix", "configuration": "Debug" },
+        { "name": "unix-release", "configurePreset": "unix", "configuration": "Release" }
+    ],
+    "testPresets": [
+        {
+            "name": "debug",
+            "configurePreset": "vs2026",
+            "configuration": "Debug",
+            "output": { "outputOnFailure": true }
+        },
+        {
+            "name": "release",
+            "configurePreset": "vs2026",
+            "configuration": "Release",
+            "output": { "outputOnFailure": true }
+        },
+        {
+            "name": "unix-release",
+            "configurePreset": "unix",
+            "configuration": "Release",
+            "output": { "outputOnFailure": true }
+        }
+    ]
+}
