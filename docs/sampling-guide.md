@@ -227,4 +227,6 @@ For reference, so you know why the rules above matter:
    (double strikes, buzzes) are flagged in a QA report with a loudness curve per key.
 5. Keep relative levels: the gain goes into the manifest, never normalized away. Keeping gain
    constant on the day is what makes this work.
-6. Write 24-bit FLACs plus `library.json`, ready to load in Keys from ☰ → Library.
+6. Write 24-bit FLACs plus an SFZ map (one `<region>` per sample: its keys, velocities and root
+   note) into `assets/tines/<name>/`. Keys loads it the same way it loads the jRhodes3d demo set,
+   and ☰ → Library switches to it.

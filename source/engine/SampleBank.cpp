@@ -5,6 +5,27 @@
 
 namespace keys
 {
+namespace
+{
+/// The median peak over the samples of the loudest velocity layer.
+float medianTopPeak(const std::vector<Zone>& zones)
+{
+    int topVelocity = 0;
+    for (const auto& zone : zones)
+        topVelocity = std::max(topVelocity, zone.hiVel);
+
+    std::vector<float> peaks;
+    for (const auto& zone : zones)
+        if (zone.hiVel == topVelocity)
+            peaks.push_back(zone.sample->audio.getMagnitude(0, zone.sample->audio.getNumSamples()));
+
+    if (peaks.empty())
+        return 0.0f;
+    std::nth_element(peaks.begin(), peaks.begin() + static_cast<std::ptrdiff_t>(peaks.size() / 2), peaks.end());
+    return peaks[peaks.size() / 2];
+}
+} // namespace
+
 const Sample& SampleBank::addSample(std::unique_ptr<Sample> sample)
 {
     jassert(sample != nullptr);
@@ -22,6 +43,7 @@ void SampleBank::addZone(const Zone& zone)
 
 void SampleBank::finalize()
 {
+    topLayerPeak = medianTopPeak(zones);
     table.fill(-1);
     if (zones.empty())
         return;
@@ -53,22 +75,36 @@ void SampleBank::finalize()
     }
 }
 
+
 void SampleBank::normalizeTo(float targetPeak)
 {
-    int topVelocity = 0;
-    for (const auto& zone : zones)
-        topVelocity = std::max(topVelocity, zone.hiVel);
-
-    std::vector<float> peaks;
-    for (const auto& zone : zones)
-        if (zone.hiVel == topVelocity)
-            peaks.push_back(zone.sample->audio.getMagnitude(0, zone.sample->audio.getNumSamples()));
-
-    if (peaks.empty())
-        return;
-    std::nth_element(peaks.begin(), peaks.begin() + static_cast<std::ptrdiff_t>(peaks.size() / 2), peaks.end());
-    const float median = peaks[peaks.size() / 2];
+    const float median = medianTopPeak(zones);
     bankGain = median > 1.0e-6f ? targetPeak / median : 1.0f;
+}
+
+void SampleBank::normalizeLoudness(float targetRms, int velocity)
+{
+    std::vector<float> levels;
+    for (const auto& sample : samples)
+    {
+        const Zone* zone = find(sample->rootNote, velocity);
+        if (zone == nullptr || zone->sample != sample.get())
+            continue; // this sample isn't what that key plays at this velocity
+        const auto& audio = sample->audio;
+        const int length = std::min(audio.getNumSamples(), static_cast<int>(sample->sampleRate));
+        if (length <= 0)
+            continue;
+        float sum = 0.0f;
+        for (int ch = 0; ch < audio.getNumChannels(); ++ch)
+            sum += audio.getRMSLevel(ch, 0, length);
+        const float within = std::clamp(static_cast<float>(velocity) / std::max(1.0f, zone->refVelocity), 0.02f, 1.0f);
+        levels.push_back(within * sum / static_cast<float>(audio.getNumChannels()));
+    }
+    if (levels.empty())
+        return;
+    std::nth_element(levels.begin(), levels.begin() + static_cast<std::ptrdiff_t>(levels.size() / 2), levels.end());
+    const float median = levels[levels.size() / 2];
+    bankGain = median > 1.0e-6f ? targetRms / median : 1.0f;
 }
 
 size_t SampleBank::memoryBytes() const noexcept

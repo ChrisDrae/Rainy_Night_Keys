@@ -19,6 +19,8 @@ compile_commands.json
 # Downloaded sample sets: fetch them with scripts/fetch-bell-samples.ps1 (they're CC0, just large)
 /assets/bell/celeste/*.flac
 /assets/bell/vibes/*.wav
+/assets/tines/**/*.flac
+/assets/tines/**/*.wav
 
 # OS junk
 .DS_Store

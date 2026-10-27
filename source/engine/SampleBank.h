@@ -54,12 +54,21 @@ public:
         return index < 0 ? nullptr : &zones[static_cast<size_t>(index)];
     }
 
-    /// Overall level trim for the whole bank (linear). Set by normalizeTo().
+    /// Overall level trim for the whole bank (linear). Set by normalizeTo() or normalizeLoudness().
     float gain() const noexcept { return bankGain; }
+
+    /// The typical peak of a hard-played note, after gain() (the median over the loudest layer).
+    /// Level-dependent effects (the bark, key noise) use it to act the same on any bank.
+    float fortePeak() const noexcept { return topLayerPeak * bankGain; }
 
     /// Loader thread: scales the bank so its loudest layer peaks around `targetPeak` (median over
     /// all samples in that layer), keeping every sample's level relative to the others.
     void normalizeTo(float targetPeak);
+
+    /// Loader thread: scales the bank so a note played at `velocity` has an RMS level of
+    /// `targetRms` over its first second (median over the sampled roots). Two banks normalised
+    /// this way sound equally loud, whatever their attacks look like.
+    void normalizeLoudness(float targetRms, int velocity = 90);
 
     const juce::String& getName() const noexcept { return name; }
     const std::vector<Zone>& getZones() const noexcept { return zones; }
@@ -74,6 +83,7 @@ private:
     std::vector<Zone> zones;
     std::array<int16_t, 128 * 128> table {};
     float bankGain = 1.0f;
+    float topLayerPeak = 0.0f; ///< median raw peak of the loudest layer, measured in finalize()
     int minRoot = 127, maxRoot = 0;
 };
 } // namespace keys

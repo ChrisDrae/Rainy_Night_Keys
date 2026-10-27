@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Parameters.h"
+#include "Presets.h"
 #include "engine/KeysEngine.h"
 #include "engine/KeysLibrary.h"
 
@@ -11,7 +12,7 @@
 //
 //  It stays thin: parameters in, MIDI in, the engine renders. The sample library is shared by every
 //  instance in the process and loads itself in the background; until the tines are ready, notes
-//  are silent (it takes about a second).
+//  are silent (it takes about a second). The factory presets double as the host's "programs".
 // =================================================================================================
 class KeysProcessor final : public juce::AudioProcessor
 {
@@ -34,12 +35,12 @@ public:
     bool acceptsMidi() const override { return true; }
     bool producesMidi() const override { return false; }
     bool isMidiEffect() const override { return false; }
-    double getTailLengthSeconds() const override { return 0.0; }
+    double getTailLengthSeconds() const override { return 5.0; } // the longest reverb, plus a margin
 
-    int getNumPrograms() override { return 1; }
-    int getCurrentProgram() override { return 0; }
-    void setCurrentProgram(int) override {}
-    const juce::String getProgramName(int) override { return {}; }
+    int getNumPrograms() override;
+    int getCurrentProgram() override;
+    void setCurrentProgram(int index) override;
+    const juce::String getProgramName(int index) override;
     void changeProgramName(int, const juce::String&) override {}
 
     void getStateInformation(juce::MemoryBlock& destData) override;
@@ -49,6 +50,14 @@ public:
     juce::AudioProcessorValueTreeState& getState() noexcept { return apvts; }
     keys::EngineStatus& getStatus() noexcept { return engine.status(); }
     const keys::KeysLibrary& getLibrary() const noexcept { return *library; }
+    keys::PresetManager& getPresets() noexcept { return presets; }
+
+    /// The window's Pedal button and the space bar hold the sustain pedal through here.
+    void setUiPedal(bool down) noexcept { uiPedal.store(down, std::memory_order_relaxed); }
+
+    /// Sampled tines (when they're installed) or the modeled ones. Saved with the session.
+    void setSampledTines(bool useSamples);
+    bool getSampledTines() const noexcept { return sampledTines.load(std::memory_order_relaxed); }
 
     /// The on-screen keyboard and incoming MIDI meet here, so keys light up for both.
     juce::MidiKeyboardState keyboardState;
@@ -56,8 +65,13 @@ public:
 private:
     juce::AudioProcessorValueTreeState apvts;
     keys::params::ParameterReader parameters; // reads apvts: declared after it
+    keys::PresetManager presets { apvts };
+    std::atomic<bool> uiPedal { false };
+    std::atomic<bool> sampledTines { true };
+    bool uiPedalSent = false; // audio thread only
     juce::SharedResourcePointer<keys::KeysLibrary> library;
     keys::KeysEngine engine;
 
+    JUCE_DECLARE_WEAK_REFERENCEABLE(KeysProcessor) // async callbacks check the processor still exists
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KeysProcessor)
 };

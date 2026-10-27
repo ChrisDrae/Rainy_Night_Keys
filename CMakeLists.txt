@@ -57,10 +57,13 @@ add_library(KeysEngine INTERFACE)
 
 target_sources(KeysEngine INTERFACE
     source/engine/BankBuilder.cpp
+    source/engine/ColourChain.cpp
     source/engine/DemoLibrary.cpp
     source/engine/KeysEngine.cpp
     source/engine/KeysLibrary.cpp
+    source/engine/Reverb.cpp
     source/engine/SampleBank.cpp
+    source/engine/SfzLoader.cpp
     source/engine/TineModel.cpp
 )
 
@@ -104,8 +107,12 @@ target_sources(KeysPluginSources INTERFACE
     source/Parameters.cpp
     source/PluginEditor.cpp
     source/PluginProcessor.cpp
-    source/ui/Backdrop.cpp
+    source/Presets.cpp
+    source/ui/ColourField.cpp
+    source/ui/Controls.cpp
+    source/ui/Keyboard.cpp
     source/ui/KeysLookAndFeel.cpp
+    source/ui/Popovers.cpp
 )
 
 target_compile_definitions(Keys PUBLIC
@@ -125,7 +132,8 @@ target_link_libraries(Keys
         juce::juce_recommended_warning_flags)
 
 # -------------------------------------------------------------------------------------------------
-#  Unit tests (Catch2 v3). They link KeysEngine only, so they run without a host or a GUI.
+#  Unit tests (Catch2 v3). They link KeysEngine plus the parameters and presets, so they run
+#  without a host or a window.
 #  Reuses Pocket Looper's downloaded Catch2 when it's there, to skip the download.
 # -------------------------------------------------------------------------------------------------
 if(KEYS_BUILD_TESTS)
@@ -145,13 +153,19 @@ if(KEYS_BUILD_TESTS)
 
     add_executable(KeysTests
         tests/BankTests.cpp
+        tests/ColourTests.cpp
         tests/EngineTests.cpp
         tests/NoteNameTests.cpp
+        tests/PresetTests.cpp
+        tests/SfzTests.cpp
         tests/TineModelTests.cpp
+        source/Parameters.cpp
+        source/Presets.cpp
     )
 
     target_link_libraries(KeysTests PRIVATE
         KeysEngine
+        juce::juce_audio_processors
         Catch2::Catch2WithMain
         juce::juce_recommended_config_flags
         juce::juce_recommended_warning_flags)
@@ -178,6 +192,28 @@ if(KEYS_BUILD_UI_SNAPSHOT)
         KeysEngine
         KeysFonts
         juce::juce_audio_utils
+        juce::juce_recommended_config_flags
+        juce::juce_recommended_warning_flags)
+endif()
+
+# -------------------------------------------------------------------------------------------------
+#  Render tool: plays a phrase through every preset into WAV files, and prints their levels.
+#      build/vs2026/KeysRender_artefacts/Release/KeysRender.exe build/renders
+# -------------------------------------------------------------------------------------------------
+if(KEYS_BUILD_UI_SNAPSHOT)
+    juce_add_console_app(KeysRender PRODUCT_NAME "KeysRender")
+    target_sources(KeysRender PRIVATE tests/KeysRender.cpp)
+    target_compile_definitions(KeysRender PRIVATE
+        JucePlugin_Name="Keys"
+        JUCE_MODAL_LOOPS_PERMITTED=1
+        JUCE_WEB_BROWSER=0
+        JUCE_USE_CURL=0)
+    target_link_libraries(KeysRender PRIVATE
+        KeysPluginSources
+        KeysEngine
+        KeysFonts
+        juce::juce_audio_utils
+        juce::juce_dsp
         juce::juce_recommended_config_flags
         juce::juce_recommended_warning_flags)
 endif()

@@ -1,18 +1,33 @@
 #pragma once
 
 #include "PluginProcessor.h"
+#include "ui/ColourField.h"
+#include "ui/Controls.h"
+#include "ui/Keyboard.h"
 #include "ui/KeysLookAndFeel.h"
+#include "ui/Popovers.h"
 
 #include <juce_audio_utils/juce_audio_utils.h>
 
+#include <array>
 #include <memory>
 
 // =================================================================================================
-//  KeysEditor — the plugin window (milestone M1: the playable demo).
+//  KeysEditor — the plugin window, "Nocturne" (docs/mockup/nocturne.html).
 //
-//  Tiles for Blend, the bell, Touch, Tune and Level; a MIDI monitor to check your keyboard; and a
-//  73-key on-screen keyboard (E1–E7, like a Mk II). In the Standalone app it also switches on every
-//  connected MIDI input, so a keyboard works without visiting the settings.
+//    header    ☰ menu · library chip with a MIDI light · ◀ preset ▶
+//    row 1     Blend · Warmth · Bark · Body · Level
+//    row 2     Dust · Bell (voice, octave, from key) · Mechanics
+//    row 3     Patina (wow, flutter, narrow) · Motion (mode, rate) · Space (type) · Signal (DI, Amp, Room)
+//    footer    Keys · Tine & Bell · Pedal
+//    keys      73 keys, E1–E7 (can be hidden)
+//
+//  Behind it all, the ColourField: light that takes its colour from the knobs and blooms with
+//  every note. Everything is laid out at a design size of 1040 × 700 (plus 112 for the keys) and
+//  scaled as a whole when the window is resized.
+//
+//  The computer keyboard plays notes too: A W S E D F T G Y H U J K O L P ; from C3, Z / X shift
+//  the octave, and holding Space is the sustain pedal.
 // =================================================================================================
 class KeysEditor final : public juce::AudioProcessorEditor, private juce::Timer
 {
@@ -22,37 +37,83 @@ public:
 
     void paint(juce::Graphics&) override;
     void resized() override;
+    bool keyPressed(const juce::KeyPress&) override;
+    bool keyStateChanged(bool isKeyDown) override;
+    void focusLost(FocusChangeType) override;
 
-    static constexpr int kWidth = 900;
-    static constexpr int kHeight = 620;
+    static constexpr int kDesignWidth = 1040;
+    static constexpr int kDesignHeight = 700;
+    static constexpr int kKeysHeight = 112;
+
+    // --- for the screenshot tool -------------------------------------------------------------------
+    void openFinePanel(const juce::String& key);
+    void openMenu();
+    void setKeysVisible(bool visible);
+    /// Runs one frame of the animation (normally the timer does this).
+    void animate(double seconds);
+    /// The window's main areas, in window coordinates, in the order the user guide numbers them.
+    std::vector<juce::Rectangle<int>> getLandmarks() const;
 
 private:
     void timerCallback() override;
+    void layout();
     void enableAllMidiInputs();
-    void drawTile(juce::Graphics&, juce::Rectangle<int> area) const;
-    void drawMonitor(juce::Graphics&, juce::Rectangle<int> area) const;
-    juce::String parameterText(const char* id) const;
+    int designHeight() const noexcept { return kDesignHeight + (keysVisible ? kKeysHeight : 0); }
+    void updateConstraints();
+
+    void toggleFine(const juce::String& key);
+    void closeFine();
+    void toggleMenu();
+    void closeMenu();
+    void showPresetList();
+    void savePresetDialog();
+
+    void releaseComputerKeys();
+    void shiftComputerOctave(int octaves);
 
     KeysProcessor& keysProcessor;
     keys::ui::KeysLookAndFeel lookAndFeel; // must outlive every component that uses it: declared first
+    juce::TooltipWindow tooltips { this, 700 };
 
-    juce::Slider blend, level, touch, tune;
-    juce::ComboBox bellVoice, bellOctave;
-    juce::MidiKeyboardComponent keyboard;
+    juce::Component content; // the window at design size; scaled by a transform
+    keys::ui::ColourField field;
 
-    // Attachments last: they're destroyed first, before the controls they point to.
-    using Apvts = juce::AudioProcessorValueTreeState;
-    std::unique_ptr<Apvts::SliderAttachment> blendAttachment, levelAttachment, touchAttachment, tuneAttachment;
-    std::unique_ptr<Apvts::ComboBoxAttachment> bellVoiceAttachment, bellOctaveAttachment;
+    keys::ui::MenuButton menuButton;
+    keys::ui::LibraryChip chip;
+    keys::ui::PresetBox presetBox;
+    keys::ui::TitleView title;
 
-    juce::Image backdrop;
-    juce::Rectangle<int> chipArea, midiArea, titleArea, monitorArea;
-    juce::Rectangle<int> blendTile, bellTile, touchTile, tuneTile, levelTile;
+    keys::ui::Tile blendTile, warmthTile, barkTile, bodyTile, levelTile;
+    keys::ui::Tile dustTile, bellTile, mechTile;
+    keys::ui::Tile patinaTile, motionTile, spaceTile, signalTile;
 
-    juce::String libraryText, midiInputText;
+    std::unique_ptr<keys::ui::FaderColumn> blend, level;
+    std::unique_ptr<keys::ui::KnobColumn> warmth, bark, body, dust, mech, patina, motion, space;
+    keys::ui::HueLabel bellLabel;
+    std::unique_ptr<keys::ui::CaptionedChoice> bellVoice, bellOctave, bellRange, motionMode, motionRate, spaceType;
+    std::unique_ptr<keys::ui::ParamToggle> wow, flutter, narrow;
+    std::array<std::unique_ptr<keys::ui::FaderColumn>, 3> signal;
+    keys::ui::CaptionView signalCaption;
+
+    keys::ui::CheckToggle keysToggle { "Keys" }, pedalToggle { "Pedal" };
+    keys::ui::CaptionView footerCaption;
+    keys::ui::KeysStrip keysStrip;
+
+    std::unique_ptr<keys::ui::FinePanel> fine;
+    std::unique_ptr<keys::ui::MenuPanel> menu;
+
+    bool keysVisible = true, still = false;
+    double lastFrame = 0.0;
     uint32_t lastEventCount = 0;
-    float midiLamp = 0.0f, meter = 0.0f;
-    int timerTicks = 0;
+    float midiLight = 0.0f;
+    int ticks = 0;
+    juce::String midiInputText;
+
+    // The computer keyboard.
+    int computerBase = 48; // C3
+    std::array<bool, 17> computerDown {};
+    std::array<int, 17> computerNote {};
+    bool spacePedal = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KeysEditor)
 };

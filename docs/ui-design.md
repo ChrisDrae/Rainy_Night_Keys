@@ -1,11 +1,10 @@
 # Keys · UI design: "Lightbox"
 
-> **Status:** this describes the first direction, *Lightbox*. The current direction is **Nocturne**
-> ([`mockup/nocturne.html`](mockup/nocturne.html)), which is darker and has every control on one
-> screen in tiles. Its controls, parameters and colour-field idea mostly carry over from this
-> document. The final pick between the two is still open. Neither the moving field nor the colour
-> knobs are built in the app yet; see the
-> [comparison in the user guide](user-guide.md#the-app-compared-with-the-nocturne-demo).
+> **Status:** this describes the first direction, *Lightbox*. The app is built from the second,
+> **Nocturne** ([`mockup/nocturne.html`](mockup/nocturne.html)): darker, with every control on one
+> screen in tiles. Its controls, sound design and colour field come from this document; the
+> differences are listed in [As built](#as-built-nocturne) at the end. The
+> [user guide](user-guide.md) describes the finished window.
 
 The reference for building the editor (milestone M3). The interactive draft lives in
 [`docs/mockup/lightbox.html`](mockup/lightbox.html) and is published as a private artifact:
@@ -225,3 +224,31 @@ User presets are XML files in `Documents/Keys/Presets`.
 | Presets | `PresetBar` | prev/next + `PopupMenu` |
 | Library chip | `LibraryChip` | text and state from `LibraryLoader` |
 | Keys | `MidiKeyboardComponent`, restyled | feeds the processor's `MidiKeyboardState` |
+
+## As built (Nocturne)
+
+The app follows [`mockup/nocturne.html`](mockup/nocturne.html). Where it differs from Lightbox:
+
+- **Layout**: tiles instead of drawers. Only Warmth, Bark, Body and Space have a ▾ popover for
+  fine controls; Patina's, Motion's and the bell's options sit on their tiles. Tune and Touch
+  moved into the ☰ menu, which also holds a MIDI monitor for testing keyboards.
+- **Parameters** that changed or were dropped (the IDs below are final):
+
+  | ID | As built |
+  |---|---|
+  | `patinaWow` `patinaFlutter` `patinaNarrow` | on/off switches (Lightbox had wow and flutter as amounts, plus `patinaAge` and `patinaSpeed`) |
+  | `motionRate` | a choice: 0.5, 1, 1.6, 2.5, 4, 6 or 8 Hz (`motionSync` was dropped) |
+  | `bellRange` | a choice: C2, F2, C3, F3 or C4 (the bell fades in over the six keys below) |
+  | `spacePre` `spaceDecay` | in ms (0–120) and seconds (0.5–4) |
+  | `bellDecay`, `dustBalance`, `mechBalance` | not built |
+
+- **Menu**: no polyphony or oversampling settings yet (64 voices; the colour chain's saturation
+  stages use antiderivative anti-aliasing instead of oversampling). The Library section switches
+  between sampled tines (any SFZ map in `assets/tines/<name>/`; jRhodes3d for now) and the
+  modeled ones.
+- **Presets** don't change Tune, Touch or Level, and switching glides continuous controls only
+  (choices and switches change at once).
+- **The field** is drawn into a ~144 px-wide buffer with its own screen / soft-light blending,
+  grade and blur, then upscaled; the vignette is part of that buffer. Notes reach it through a
+  lock-free queue from the audio thread. With the window open, the app used about 10 % of one
+  core on the development machine (animation and audio together).
